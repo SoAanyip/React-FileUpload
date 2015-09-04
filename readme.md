@@ -42,33 +42,16 @@
 	    ...
 	}
 作为FileUpload的属性传入。其属性为：
+字段 | 类型 | 默认值| 说明
+------------ | ------------- | ------------ | ------------
+basUrl | string | ``''`` | 目标域名
+param | object | ``{}`` | 作为get参数配置在域名之后
+dataType | string | ``'json'`` | 回应的格式
+chooseAndUpload | boolean | ``'false'`` | 是否在用户选择了文件之后立刻上传,如果为true则只需在children传入ref="chooseAndUpload"的DOM就可触发。默认false
+paramAddToFile | array[string] | ``'[]'`` | 需要添加到file对象（file API）上作为属性的param的名字数组。默认空
+wrapperDisplay | string | ``'inline-block'`` | 包裹chooseBtn或uploadBtn的div的display默认'inline-block'
 
-#### basUrl #### 
-{string} 
-目标域名
 
-#### param #### 
-{object} 
-作为get参数配置在域名之后
-
-#### dataType #### 
-{'json' | 'text'} 
-回应的格式
-
-#### chooseAndUpload #### 
-{boolean} 
-是否在用户选择了文件之后立刻上传,如果为true则只需在children传入ref="chooseAndUpload"的DOM就可触发。默认false
-
-#### paramAddToFile #### 
-{array[string]} 
-需要添加到file对象（file API）上作为属性的param的名字数组。默认空
-
-#### wrapperDisplay #### 
-{string} 
-包裹chooseBtn或uploadBtn的div的display默认'inline-block'
-
--
--
 
 ### 生命周期函数 ###
 同样作为options的属性传入
