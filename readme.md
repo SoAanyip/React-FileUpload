@@ -45,7 +45,7 @@
 
 字段 | 类型 | 默认值| 说明
 ------------ | ------------- | ------------ | ------------
-basUrl | string | ``''`` | 目标域名
+baseUrl | string | ``''`` | 目标域名
 param | object | ``{}`` | 作为get参数配置在域名之后
 dataType | string | ``'json'`` | 回应的格式
 chooseAndUpload | boolean | ``'false'`` | 是否在用户选择了文件之后立刻上传,如果为true则只需在children传入ref="chooseAndUpload"的DOM就可触发。默认false
@@ -83,7 +83,7 @@ wrapperDisplay | string | ``'inline-block'`` | 包裹chooseBtn或uploadBtn的div
 #### doUpload(files,mill) ####
 上传动作(xhr send | form submit)执行后(请求发送后)调用
 
-@param file {{array[File] | string} 现代浏览器返回包含File对象的数组(File API返回的方式)，IE返回文件名
+@param file {array[File] | string} 现代浏览器返回包含File对象的数组(File API返回的方式)，IE返回文件名
 
 @param mill {long} 上传动作执行时的时间(毫秒)，如果File对象已有mill属性则返回一样的
 
