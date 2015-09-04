@@ -4,8 +4,8 @@
 ##目录
 
 *	[简介](#introduce)
-*	[API](#API)
-*	[License](#License)
+*	[API](#api)
+*	[License](#license)
 
 ## introduce ##
 1. react文件上传组件，现代浏览器采用File API+Form data异步上传，兼容IE8+使用form+iframe异步上传。
@@ -16,36 +16,31 @@
 6. **暂时不支持多文件同时上传**
 
 简单使用方式：
-```
-render(){
-    /*指定参数*/
-    var options={
-        basUrl:'http://127.0.0.1',
-        param:{
-            fid:0
-        }
-    }
-    /*调用FileUpload,传入options。然后在children中*/
-    /*传入两个dom(不一定是button)并设置其ref值。*/
-    return (
-        <FileUpload options={options}>
-            <button ref="chooseBtn">choose</button>
-            <button ref="uploadBtn">upload<button>
-        </FIleUpload>
-    )
-        
-}
-```
+	render(){
+		/*指定参数*/
+		var options={
+			basUrl:'http://127.0.0.1',
+			param:{
+				fid:0
+			}
+		}
+		/*调用FileUpload,传入options。然后在children中*/
+		/*传入两个dom(不一定是button)并设置其ref值。*/
+		return (
+			<FileUpload options={options}>
+				<button ref="chooseBtn">choose</button>
+				<button ref="uploadBtn">upload<button>
+			</FIleUpload>
+		)	        
+	}
 
 ## API ##
 
 ### options ###
-```
-options:{
-    baseUrl:'xxx',
-    ...
-}
-```
+	options:{
+	    baseUrl:'xxx',
+	    ...
+	}
 作为FileUpload的属性传入。其属性为：
 
 #### basUrl #### 
@@ -131,100 +126,93 @@ options:{
 不带文件上传(不构造FormData对象)，为了给秒传功能使用，不影响IE
 
 ### 示例 ###
-```
-options:{
-    baseUrl : './upload',
-    param : {
-        name:'123',
-        category: '1'
-    },
-    chooseAndUpload : false,
-    paramAddToFile : ['category'],
-    dataType : 'json',
-    wrapperDisplay : 'inline-block',
-    beforeChoose : function()[
-        return user.isAllowUpload;
-    },
-    chooseFile : function(files){
-        console.log('you choose',typeof files == 'string' ? files : files[0].name);
-    },
-    beforeUpload : function(files,mill){
-        if(typeof files == string) return false;
-        if(files[0].size<1024*1024*20){
-            files[0].mill = mill;
-            return true;
-        }
-        return false;
-    },
-    doUpload : function(files,mill){
-        var isFile = !(typeof files == 'string');
-        var name = isFile? files[0].name : files;
-        var tmpFile = {
-            name:name,
-            mill: isFile? files[0].mill : mill
-        }
-        /*存入暂存空间*/
-        tempSave.push(tmpFile);
-        console.log('uploading',name);
-    },
-    uploading : function(progress){
-        console.log('loading...',progress.loaded/progress.total+'%');
-    },
-    uploadSuccess : function(resp){
-        /*通过mill找到对应的文件，删除对应tmpFile*/
-        popTmpSave(resp.mill);
-        console.log('upload success',resp.data);
-    },
-    uploadError : function(err){
-        alert(err.message);
-    },
-    uploadFail : function(resp){
-        alert(resp);
-    },
-}
-```
+	options:{
+	    baseUrl : './upload',
+	    param : {
+	        name:'123',
+	        category: '1'
+	    },
+	    chooseAndUpload : false,
+	    paramAddToFile : ['category'],
+	    dataType : 'json',
+	    wrapperDisplay : 'inline-block',
+	    beforeChoose : function()[
+	        return user.isAllowUpload;
+	    },
+	    chooseFile : function(files){
+	        console.log('you choose',typeof files == 'string' ? files : files[0].name);
+	    },
+	    beforeUpload : function(files,mill){
+	        if(typeof files == string) return false;
+	        if(files[0].size<1024*1024*20){
+	            files[0].mill = mill;
+	            return true;
+	        }
+	        return false;
+	    },
+	    doUpload : function(files,mill){
+	        var isFile = !(typeof files == 'string');
+	        var name = isFile? files[0].name : files;
+	        var tmpFile = {
+	            name:name,
+	            mill: isFile? files[0].mill : mill
+	        }
+	        /*存入暂存空间*/
+	        tempSave.push(tmpFile);
+	        console.log('uploading',name);
+	    },
+	    uploading : function(progress){
+	        console.log('loading...',progress.loaded/progress.total+'%');
+	    },
+	    uploadSuccess : function(resp){
+	        /*通过mill找到对应的文件，删除对应tmpFile*/
+	        popTmpSave(resp.mill);
+	        console.log('upload success',resp.data);
+	    },
+	    uploadError : function(err){
+	        alert(err.message);
+	    },
+	    uploadFail : function(resp){
+	        alert(resp);
+	    },
+	}
+
 
 ## children ##
 
 可以传入两个btn
-```
-<FileUpload options={options}>
-    <button ref="chooseBtn">choose</button>
-    <button ref="uploadBtn">upload<button>
-</FIleUpload>
-```
+	<FileUpload options={options}>
+		<button ref="chooseBtn">choose</button>
+		<button ref="uploadBtn">upload<button>
+	</FIleUpload>
 
 如果选择chooseAndUpload为true，则需要传入一个，且ref为chooseAndUpload
-```
-<FileUpload options={options}>
-    <button ref="chooseAndUpload">chooseAndUpload</button>
-</FIleUpload>
-```
+
+	<FileUpload options={options}>
+	    <button ref="chooseAndUpload">chooseAndUpload</button>
+	</FIleUpload>
 
 当然并不一定是btn
-```
-<FileUpload options={options}>
-    <div ref="chooseBtn">
-        <i className="icon icon-upload" />
-        <span>do it</span>
-    </div>
-    <button ref="uploadBtn">upload<button>
-</FIleUpload>
-```
+	<FileUpload options={options}>
+	    <div ref="chooseBtn">
+	        <i className="icon icon-upload" />
+	        <span>do it</span>
+	    </div>
+	    <button ref="uploadBtn">upload<button>
+	</FIleUpload>
 
 在这中间也可以插入其他DOM
-```
-<FileUpload options={options}>
-    <h3>Please choose</h3>
-    <div ref="chooseBtn">
-        <i className="icon icon-upload" />
-        <span>do it</span>
-    </div>
-    <p>You have uploaded {this.state.rate}</p>
-    <button ref="uploadBtn">upload<button>
-    <p>Thanks for using</p>
-</FIleUpload>
-```
+
+	<FileUpload options={options}>
+	    <h3>Please choose</h3>
+	    <div ref="chooseBtn">
+	        <i className="icon icon-upload" />
+	        <span>do it</span>
+	    </div>
+	    <p>You have uploaded {this.state.rate}</p>
+	    <button ref="uploadBtn">upload<button>
+	    <p>Thanks for using</p>
+	</FIleUpload>
 
 ## License ##
 MIT	
