@@ -16,31 +16,35 @@
 6. **暂时不支持多文件同时上传**
 
 简单使用方式：
-	render(){
-		/*指定参数*/
-		var options={
-			basUrl:'http://127.0.0.1',
-			param:{
-				fid:0
-			}
+```
+render(){
+	/*指定参数*/
+	var options={
+		basUrl:'http://127.0.0.1',
+		param:{
+			fid:0
 		}
-		/*调用FileUpload,传入options。然后在children中*/
-		/*传入两个dom(不一定是button)并设置其ref值。*/
-		return (
-			<FileUpload options={options}>
-				<button ref="chooseBtn">choose</button>
-				<button ref="uploadBtn">upload<button>
-			</FIleUpload>
-		)	        
 	}
+	/*调用FileUpload,传入options。然后在children中*/
+	/*传入两个dom(不一定是button)并设置其ref值。*/
+	return (
+		<FileUpload options={options}>
+			<button ref="chooseBtn">choose</button>
+			<button ref="uploadBtn">upload<button>
+		</FIleUpload>
+	)	        
+}
+```
 
 ## API ##
 
 ### options ###
-	options:{
-	    baseUrl:'xxx',
-	    ...
-	}
+```
+options:{
+    baseUrl:'xxx',
+    ...
+}
+```
 作为FileUpload的属性传入。其属性为：
 
 字段 | 类型 | 默认值| 说明
