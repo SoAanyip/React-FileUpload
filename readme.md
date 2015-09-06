@@ -1,13 +1,15 @@
 # React-FileUpload #
 
+![npm version](https://badge.fury.io/js/react-fileupload.svg)
 
 ##目录
 
 *	[简介](#introduce)
+*   [Download](#download)
 *	[API](#api)
 *	[License](#license)
 
-## introduce ##
+## Introduce ##
 1. react文件上传组件，现代浏览器采用File API+Form data异步上传，兼容IE8+使用form+iframe异步上传。
 2. 使用到ES6，需要经babel转译。
 3. IE通过把透明的上传按钮覆盖在传入的children的上传按钮上进行点击的捕捉。同时隐藏iframe。现代浏览器通过传入的按钮上再增加一层wrapper来捕捉。
@@ -17,6 +19,8 @@
 
 简单使用方式：
 ```
+var FileUpload = require('react-fileupload');
+...
 render(){
 	/*指定参数*/
 	var options={
@@ -35,6 +39,9 @@ render(){
 	)	        
 }
 ```
+
+## Download ##
+`npm install react-fileupload`
 
 ## API ##
 

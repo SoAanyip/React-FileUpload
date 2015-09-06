@@ -9,7 +9,7 @@
  */
 
 
-//let React = require('react');
+let React = require('react');
 const emptyFunction = function () {
 };
 /*当前IE上传组的id*/
