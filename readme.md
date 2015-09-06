@@ -2,15 +2,226 @@
 
 ![npm version](https://badge.fury.io/js/react-fileupload.svg)
 
-##目录
-
-*	[简介](#introduce)
+##Index##
+### EN ###
+*	[Introduce](#introduce)
 *   [Download](#download)
-*	[API](#api)
+*	[API](#api-en)
+*	[License](#license)
+
+### CN ###
+
+*	[简介](#简介)
+*   [下载](#下载)
+*	[API](#api-cn)
 *	[License](#license)
 
 ## Introduce ##
-1. react文件上传组件，现代浏览器采用File API+Form data异步上传，兼容IE8+使用form+iframe异步上传。
+1. A React component of async file uploading, using File API+FormData in modern browser, and form+iframe in IE.
+2. With help of ES6, so babel is required.
+3. When in IE, an invisible `<input>` will be put over the chooseBtn so that it can catch the click event. It is simpler in moderns because the event will be caught by the wrapper.
+4. `Progress` is supported by the moderns to show the progress of uploading.
+5. Life circle functions.
+6. **multi-upload has not been supported yet**
+
+## Download ##
+`npm install react-fileupload`
+
+## API-EN ##
+
+### options ###
+```
+options:{
+    baseUrl:'xxx',
+    ...
+}
+```
+`options` is an attribute of `<FileUpload>`. The properties of `options` are: 
+
+name | type | default | note
+------------ | ------------- | ------------ | ------------
+baseUrl | string | ``''`` | url
+param | object | ``{}`` | params that appended after baseUrl.
+dataType | `'json'/'text'`  | ``'json'`` | type of response.
+chooseAndUpload | boolean | ``false`` | whether the upload action will be triggered just after the user choose a file. If true, an DOM with the `ref='chooseAndUpload'` should be use as a child. default to false.
+paramAddToFile | array[string] | ``[]`` | an array that including names of params that need to append to the file instance(File ApI instance). default to [].
+wrapperDisplay | string | ``'inline-block'`` | the display of the wrappers of chooseBtn or uploadBtn. default to 'inline-block'.
+
+
+
+### Life circle functions ###
+Also set as the properties of options.
+
+#### beforeChoose() ####
+Triggered after clicking the `chooseBtn` and before choosing file. return true to continue or false to stop choosing.
+
+@param  null
+
+@return  {boolean} allow the choose or not
+
+#### chooseFile(files) ####
+The callback triggered after choosing.
+
+@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE it will be the full name of file.
+
+@return
+
+#### beforeUpload(files,mill) ####
+Triggered before uploading. return true to continue or false to stop uploading.
+
+@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE it will be the full name of file.
+
+@param mill {long} The time of the upload action (millisecond). If the File instance has the `mill` property it will be the same as it.
+
+@return  {boolean} Allow the upload action or not.
+
+#### doUpload(files,mill) ####
+Triggered after the request is sent(xhr send | form submit).
+
+@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE it will be the full name of file.
+
+@param mill {long} The time of the upload action (millisecond). If the File instance has the `mill` property it will be the same as it.
+
+@return
+
+#### uploading(progress) ####
+It will be triggered continuously when the file is uploading in moderns.
+
+@param progress {Progress} Progress instance，useful properties such as loaded and total can be found.
+
+@return
+
+#### uploadSuccess(resp) ####
+Callback when upload succeed (according to the AJAX simply).
+
+@param resp {json | string} The response is fomatted According to options.dataType.
+
+@return
+
+#### uploadError(err) ####
+Callback when error occurred (according to the AJAX simply).
+
+@param err {Error | object} If this is an error that caught by `try`, it will be an object with `type` and `message`.
+
+@return
+
+#### uploadFail(resp) ####
+Callback when upload failed (according to the AJAX simply).
+
+@param resp {string} Message of it.
+
+### Special properties ###
+Also can be set as property of `options`, but is not in common use.
+
+#### filesToUpload ####
+{array[File]}
+
+IF there is file(File instance) that need to be uploaded immediately, it can be pushed in this array, and should be cleared in `beforeUpload` or `doUpload`. Not supporting IE. This file will be detected in `componentWillReceiveProps` and uploaded.
+
+#### _withoutFileUpload ####
+{boolean}
+
+Send AJAX without the file(without the FormData). 
+
+### example ###
+```
+options:{
+    baseUrl : './upload',
+    param : {
+        name:'123',
+        category: '1'
+    },
+    chooseAndUpload : false,
+    paramAddToFile : ['category'],
+    dataType : 'json',
+    wrapperDisplay : 'inline-block',
+    beforeChoose : function()[
+        return user.isAllowUpload;
+    },
+    chooseFile : function(files){
+        console.log('you choose',typeof files == 'string' ? files : files[0].name);
+    },
+    beforeUpload : function(files,mill){
+        if(typeof files == string) return false;
+        if(files[0].size<1024*1024*20){
+            files[0].mill = mill;
+            return true;
+        }
+        return false;
+    },
+    doUpload : function(files,mill){
+        var isFile = !(typeof files == 'string');
+        var name = isFile? files[0].name : files;
+        var tmpFile = {
+            name:name,
+            mill: isFile? files[0].mill : mill
+        }
+        /*存入暂存空间*/
+        tempSave.push(tmpFile);
+        console.log('uploading',name);
+    },
+    uploading : function(progress){
+        console.log('loading...',progress.loaded/progress.total+'%');
+    },
+    uploadSuccess : function(resp){
+        /*Find the file with mill, and delete the tmpFile.*/
+        popTmpSave(resp.mill);
+        console.log('upload success',resp.data);
+    },
+    uploadError : function(err){
+        alert(err.message);
+    },
+    uploadFail : function(resp){
+        alert(resp);
+    },
+}
+```
+
+
+## children ##
+
+You can just set two btns.
+```
+<FileUpload options={options}>
+	<button ref="chooseBtn">choose</button>
+	<button ref="uploadBtn">upload<button>
+</FIleUpload>
+```
+
+Or if you set the `chooseAndUpload` to true, you need to set only one with `ref="chooseAndUpload"`.
+```
+<FileUpload options={options}>
+    <button ref="chooseAndUpload">chooseAndUpload</button>
+</FIleUpload>
+```
+
+Ofcourse btn is not necessary.
+```
+<FileUpload options={options}>
+    <div ref="chooseBtn">
+        <i className="icon icon-upload" />
+        <span>do it</span>
+    </div>
+    <button ref="uploadBtn">upload<button>
+</FIleUpload>
+```
+
+Other DOMs can also be set as children.
+```
+<FileUpload options={options}>
+    <h3>Please choose</h3>
+    <div ref="chooseBtn">
+        <i className="icon icon-upload" />
+        <span>do it</span>
+    </div>
+    <p>You have uploaded {this.state.rate}</p>
+    <button ref="uploadBtn">upload<button>
+    <p>Thanks for using</p>
+</FIleUpload>
+```
+
+## 简介 ##
+1. React文件上传组件，现代浏览器采用File API+FormData异步上传，兼容IE8+使用form+iframe异步上传。
 2. 使用到ES6，需要经babel转译。
 3. IE通过把透明的上传按钮覆盖在传入的children的上传按钮上进行点击的捕捉。同时隐藏iframe。现代浏览器通过传入的按钮上再增加一层wrapper来捕捉。
 4. 现代浏览器支持progress，从而显示上传进度
@@ -40,10 +251,10 @@ render(){
 }
 ```
 
-## Download ##
+## 下载 ##
 `npm install react-fileupload`
 
-## API ##
+## API-CN ##
 
 ### options ###
 ```
@@ -58,9 +269,9 @@ options:{
 ------------ | ------------- | ------------ | ------------
 baseUrl | string | ``''`` | 目标域名
 param | object | ``{}`` | 作为get参数配置在域名之后
-dataType | string | ``'json'`` | 回应的格式
-chooseAndUpload | boolean | ``'false'`` | 是否在用户选择了文件之后立刻上传,如果为true则只需在children传入ref="chooseAndUpload"的DOM就可触发。默认false
-paramAddToFile | array[string] | ``'[]'`` | 需要添加到file对象（file API）上作为属性的param的名字数组。默认空
+dataType | `'json'/'text'` | ``'json'`` | 回应的格式
+chooseAndUpload | boolean | ``false`` | 是否在用户选择了文件之后立刻上传,如果为true则只需在children传入ref="chooseAndUpload"的DOM就可触发。默认false
+paramAddToFile | array[string] | ``[]`` | 需要添加到file对象（file API）上作为属性的param的名字数组。默认空
 wrapperDisplay | string | ``'inline-block'`` | 包裹chooseBtn或uploadBtn的div的display默认'inline-block'
 
 
