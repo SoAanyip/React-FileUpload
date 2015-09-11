@@ -36,16 +36,21 @@ let FileUpload = React.createClass({
 
     componentWillMount(){
         this.isIE = this.checkIE() > 0;
+        /*因为IE每次要用到很多form组，如果在同一页面需要用到多个form组可以在options传入tag作为区分。并且不随后续props改变而改变*/
+        let tag = this.props.options.tag;
+        this.IETag = tag ? tag+'_' : '';
+
         this.updateProps(this.props);
     },
 
     componentWillReceiveProps(newProps){
         this.updateProps(newProps);
-    },
+     },
 
     render(){
         return this.packRender();
     },
+
 
     /*根据props更新组件*/
     updateProps(props){
@@ -113,10 +118,10 @@ let FileUpload = React.createClass({
 
         this.files = options.files || false;        //保存需要上传的文件
         /*特殊内容*/
-        this.filesToUpload = options.filesToUpload || [];       //如有要立即上传的文件，放入这个数组，然后在beforeUpload或者doUpload外部清除传入file，不支持IE
+        this.filesToUpload = options.filesToUpload || [];       //使用filesToUpload()方法代替
         this._withoutFileUpload = options._withoutFileUpload || false;      //不带文件上传，为了给秒传功能使用，不影响IE
 
-        /*如果有要立即上传的文件，在此处执行上传*/
+        /*使用filesToUpload()方法代替*/
         if (this.filesToUpload.length && !this.isIE) {
             for (let i = 0, len = this.filesToUpload.length; i < len; i++) {
                 this.files = [this.filesToUpload[i]];
@@ -189,9 +194,21 @@ let FileUpload = React.createClass({
     //TODO 把上传完毕的form和frame重新变为空闲
     multiIEForm(id){
         let formArr = [];
+        /*是否最后一个form*/
         let isEnd = false;
         for (let i = 0; i <= id; i++) {
+            insertIEForm.call(this,formArr,i);
+        }
+
+        return (
+            <div className={this.props.className} style={this.props.style} id="react-file-uploader">
+                {formArr}
+            </div>
+        )
+
+        function insertIEForm(formArr,i){
             if (i == id) isEnd = true;
+            i = `${this.IETag}${i}`;
             formArr.push((
                 <form id={`ajax_upload_file_form_${i}`} method="post" target={`ajax_upload_file_frame_${i}`}
                       key={`ajax_upload_file_form_${i}`}
@@ -244,12 +261,6 @@ let FileUpload = React.createClass({
                 </iframe>
             ))
         }
-        return (
-            <div className={this.props.className} style={this.props.style} id="react-file-uploader">
-                {formArr}
-            </div>
-
-        )
     },
 
     /*触发隐藏的input框选择*/
@@ -279,30 +290,29 @@ let FileUpload = React.createClass({
     IEBeforeChoose(e){
         let jud = this.beforeChoose();
         if (jud != true && jud != undefined) e.preventDefault();
-        e.target.blur();
     },
     /*IE需要用户真实点击上传按钮，所以使用透明按钮*/
     /*触发chooseFile*/
     IEChooseFile(e){
         this.fileName = e.target.value.substring(e.target.value.lastIndexOf('\\') + 1);
         this.chooseFile(this.fileName);
+        /*先执行IEUpload，配置好action等参数，然后submit*/
         if (this.chooseAndUpload && (this.IEUpload() !== false)) {
-            document.getElementById(`ajax_upload_file_form_${currentIEID - 1}`).submit();
+            document.getElementById(`ajax_upload_file_form_${this.IETag}${currentIEID - 1}`).submit();
         }
+        e.target.blur();
     },
     /*IE处理上传函数*/
     /*触发beforeUpload doUpload*/
     IEUpload(e){
         let mill = (new Date).getTime();
         let jud = this.beforeUpload(this.fileName, mill);
-        if (jud != true && jud != undefined) return false;
-
-        let that = this;
-        if (!this.fileName) {
-            console.log('no filename')
+        if (!this.fileName || (jud != true && jud != undefined) ) {
             if (e) e.preventDefault();
             return false;
         }
+        let that = this;
+
         /*url参数*/
         let baseUrl = this.baseUrl;
         let param = this.param;
@@ -313,7 +323,7 @@ let FileUpload = React.createClass({
             param['_'] = mill;
             param['ie'] = 'true';
             for (let i in param) {
-                paramArr.push(`${i}=${param[i]}`)
+                if(param[i] != undefined) paramArr.push(`${i}=${param[i]}`)
             }
             paramStr = '?' + paramArr.join('&');
 
@@ -322,11 +332,11 @@ let FileUpload = React.createClass({
             }
         }
         let targeturl = baseUrl + paramStr;
-        document.getElementById(`ajax_upload_file_form_${currentIEID}`).setAttribute('action', targeturl);
+        document.getElementById(`ajax_upload_file_form_${this.IETag}${currentIEID}`).setAttribute('action', targeturl);
         /*当前上传id*/
         let partIEID = currentIEID;
         /*回调函数*/
-        document.getElementById(`ajax_upload_file_frame_${partIEID}`).attachEvent('onload',function(e){
+        document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}`).attachEvent('onload',function(e){
             console.log('load', partIEID);
             try {
                 that.uploadSuccess(that.IECallback(that.dataType, partIEID));
@@ -334,7 +344,7 @@ let FileUpload = React.createClass({
                 that.uploadError(e);
             } finally {
                 /*清除输入框的值*/
-                let oInput = that.refs[`ajax_upload_hidden_input_${partIEID}`].getDOMNode();
+                let oInput = document.getElementById(`ajax_upload_hidden_input_${that.IETag}${partIEID}`);
                 oInput.outerHTML = oInput.outerHTML;
             }
         });
@@ -344,7 +354,7 @@ let FileUpload = React.createClass({
     /*IE回调函数*/
     //TODO 处理Timeout
     IECallback(dataType, frameId){
-        let frame = document.getElementById(`ajax_upload_file_frame_${frameId}`);
+        let frame = document.getElementById(`ajax_upload_file_frame_${this.IETag}${frameId}`);
         let resp = {};
         let content = frame.contentWindow ? frame.contentWindow.document.body : frame.contentDocument.document.body;
         if (!content) throw new Error('Your browser does not support async upload');
@@ -448,6 +458,15 @@ let FileUpload = React.createClass({
 
         /*清除input的值*/
         this.refs['ajax_upload_file_input'].getDOMNode().value = '';
+    },
+
+    /*供外部调用方法，传入files（File API）数组可以立刻执行上传动作，IE不支持。调用随后会触发beforeUpload*/
+    filesToUpload(files){
+        if(this.isIE) return;
+        for (let i = 0, len = this.filesToUpload.length; i < len; i++) {
+            this.files = [this.filesToUpload[i]];
+            this.commonUpload();
+        }
     },
     /*判断ie版本*/
     checkIE() {

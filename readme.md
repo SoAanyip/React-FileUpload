@@ -8,6 +8,7 @@
 *   [Download](#download)
 *	[API](#api-en)
 *	[License](#license)
+*	[Change-log](#change-log)
 
 ### CN ###
 
@@ -15,6 +16,7 @@
 *   [下载](#下载)
 *	[API](#api-cn)
 *	[License](#license)
+*	[Change-log](#change-log)
 
 ## Introduce ##
 1. A React component of async file uploading, using File API+FormData in modern browser, and form+iframe in IE.
@@ -113,15 +115,24 @@ Callback when upload failed (according to the AJAX simply).
 ### Special properties ###
 Also can be set as property of `options`, but is not in common use.
 
-#### filesToUpload ####
-{array[File]}
+#### tag ####
+{string}
 
-IF there is file(File instance) that need to be uploaded immediately, it can be pushed in this array, and should be cleared in `beforeUpload` or `doUpload`. Not supporting IE. This file will be detected in `componentWillReceiveProps` and uploaded.
+Multi form groups are required in IE. If there are multi-use of `<FileUpload>` in one page, use tag to distinguish them.
 
 #### _withoutFileUpload ####
 {boolean}
 
-Send AJAX without the file(without the FormData). 
+Send AJAX without the file(without the FormData).
+
+#### filesToUpload(abandoned) ####
+Use filesToUpload(files) of component functions instead.
+
+{array[File]}
+
+IF there is file(File instance) that need to be uploaded immediately, it can be pushed in this array, and should be cleared in `beforeUpload` or `doUpload`. Not supporting IE. This file will be detected in `componentWillReceiveProps` and uploaded.
+
+
 
 ### example ###
 ```
@@ -178,7 +189,7 @@ options:{
 ```
 
 
-## children ##
+### children ###
 
 You can just set two btns.
 ```
@@ -219,6 +230,31 @@ Other DOMs can also be set as children.
     <p>Thanks for using</p>
 </FIleUpload>
 ```
+
+
+### Component functions ###
+Use via refs. eg:
+
+```
+componentDidUpdate(){
+    this.refs['File-Upload'].filesToUpload([this.state.file]);
+}
+
+render(){
+    return(){
+        <FileUpload ref="File-Upload" options={...}>
+        </FileUpload>
+    }
+}
+```
+
+#### filesToUpload ####
+IF there is file(File instance) that need to be uploaded immediately,use this function. BeforeUpload() will be triggered after this function
+
+@param files {array[file]} files array that need to be uploaded
+
+@return null
+
 
 ## 简介 ##
 1. React文件上传组件，现代浏览器采用File API+FormData异步上传，兼容IE8+使用form+iframe异步上传。
@@ -340,15 +376,23 @@ wrapperDisplay | string | ``'inline-block'`` | 包裹chooseBtn或uploadBtn的div
 ### 特殊属性 ###
 以下也可以作为options的属性传入，但一般不使用到
 
-#### filesToUpload ####
-{array[File]}
+#### tag ####
+{string}
 
-如有要立即上传的文件(File对象)，放入这个数组，然后在beforeUpload或者doUpload外部清除传入file，不支持IE。传入的文件会在componentWillReceiveProps检测到并立刻上传。
+IE上传需要多个form组，如需在一个页面引入多个<FileUpload>，用tag区分form组。
 
 #### _withoutFileUpload ####
 {boolean}
 
 不带文件上传(不构造FormData对象)，为了给秒传功能使用，不影响IE
+
+#### filesToUpload(废弃) ####
+使用组件方法filesToUpload(files)代替。
+
+{array[File]}
+
+如有要立即上传的文件(File对象)，放入这个数组，然后在beforeUpload或者doUpload外部清除传入file，不支持IE。传入的文件会在componentWillReceiveProps检测到并立刻上传。
+
 
 ### 示例 ###
 ```
@@ -405,7 +449,7 @@ options:{
 ```
 
 
-## children ##
+### children ###
 
 可以传入两个btn
 ```
@@ -446,5 +490,39 @@ options:{
     <p>Thanks for using</p>
 </FIleUpload>
 ```
+
+### 组件方法 ###
+通过refs来使用。eg:
+
+```
+componentDidUpdate(){
+    this.refs['File-Upload'].filesToUpload([this.state.file]);
+}
+
+render(){
+    return(){
+        <FileUpload ref="File-Upload" options={...}>
+        </FileUpload>
+    }
+}
+```
+
+#### filesToUpload ####
+如有要立即上传的文件(File对象),调用此方法上传。调用后会接着触发beforeUpload方法。
+
+@param files {array[file]} 需要上传的文件数组
+
+@return null
+
+
+## Change-log ##
+
+### 1.1.0 ###
+- Add component function `filesToUpload`
+- Add special property `tag`
+
+### 1.0.1 ###
+init
+
 ## License ##
 MIT	
