@@ -24,7 +24,31 @@
 3. When in IE, an invisible `<input>` will be put over the chooseBtn so that it can catch the click event. It is simpler in moderns because the event will be caught by the wrapper.
 4. `Progress` is supported by the moderns to show the progress of uploading.
 5. Life circle functions.
-6. **multi-upload has not been supported yet**
+6. No preset styles. Just use your favorite. 
+7. **multi-upload has not been supported yet**
+
+### Get started ###
+```
+var FileUpload = require('react-fileupload');
+...
+render(){
+	/*set properties*/
+	var options={
+		basUrl:'http://127.0.0.1',
+		param:{
+			fid:0
+		}
+	}
+	/*Use FileUpload with options*/
+	/*Set two dom with ref*/
+	return (
+		<FileUpload options={options}>
+			<button ref="chooseBtn">choose</button>
+			<button ref="uploadBtn">upload<button>
+		</FIleUpload>
+	)	        
+}
+```
 
 ## Download ##
 `npm install react-fileupload`
@@ -262,7 +286,8 @@ IF there is file(File instance) that need to be uploaded immediately,use this fu
 3. IE通过把透明的上传按钮覆盖在传入的children的上传按钮上进行点击的捕捉。同时隐藏iframe。现代浏览器通过传入的按钮上再增加一层wrapper来捕捉。
 4. 现代浏览器支持progress，从而显示上传进度
 5. 丰富的生命周期函数
-6. **暂时不支持多文件同时上传**
+6. 不包含预设样式，开放式组件 
+7. **暂时不支持多文件同时上传**
 
 简单使用方式：
 ```
