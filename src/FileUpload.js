@@ -14,6 +14,8 @@ const emptyFunction = function () {
 };
 /*当前IE上传组的id*/
 let currentIEID = 0;
+/*存放当前IE上传组的可用情况*/
+let IEFormGroup = [true];
 
 let FileUpload = React.createClass({
 
@@ -23,7 +25,7 @@ let FileUpload = React.createClass({
             uploadBtn: {},       //上传按钮。如果chooseAndUpload=true则无效。
             before: [],      //存放props.children中位于chooseBtn前的元素
             middle: [],      //存放props.children中位于chooseBtn后，uploadBtn前的元素
-            after: []        //存放props.children中位于uploadBtn后的元素
+            after: []        //存放props.children中位于uploadBtn后的元素,
         }
 
     },
@@ -36,8 +38,8 @@ let FileUpload = React.createClass({
 
     componentWillMount(){
         this.isIE = this.checkIE() > 0;
-        /*因为IE每次要用到很多form组，如果在同一页面需要用到多个form组可以在options传入tag作为区分。并且不随后续props改变而改变*/
-        let tag = this.props.options.tag;
+        /*因为IE每次要用到很多form组，如果在同一页面需要用到多个<FileUpload>可以在options传入tag作为区分。并且不随后续props改变而改变*/
+        let tag = this.props.options && this.props.options.tag;
         this.IETag = tag ? tag+'_' : '';
 
         this.updateProps(this.props);
@@ -61,8 +63,10 @@ let FileUpload = React.createClass({
         this.chooseAndUpload = options.chooseAndUpload || false;      //是否在用户选择了文件之后立刻上传
         this.paramAddToFile = options.paramAddToFile || [];     //需要添加到file对象（file API）上的param，不支持IE
         /*upload success 返回resp的格式*/
-        this.dataType = options.dataType ? options.dataType.toLowerCase() == 'json' ? 'json' : options.dataType.toLowerCase() == 'text' ? 'text' : 'json' : 'json';
+        this.dataType = 'json';
+        options.dataType && (options.dataType.toLowerCase() == 'text') && (this.dataType = 'text');
         this.wrapperDisplay = options.wrapperDisplay || 'inline-block';     //包裹chooseBtn或uploadBtn的div的display
+        this.timeout = options.timeout || 0;     //超时时间
 
         /*生命周期函数*/
         /**
@@ -118,8 +122,8 @@ let FileUpload = React.createClass({
 
         this.files = options.files || false;        //保存需要上传的文件
         /*特殊内容*/
-        this.filesToUpload = options.filesToUpload || [];       //使用filesToUpload()方法代替
         this._withoutFileUpload = options._withoutFileUpload || false;      //不带文件上传，为了给秒传功能使用，不影响IE
+        this.filesToUpload = options.filesToUpload || [];       //使用filesToUpload()方法代替
 
         /*使用filesToUpload()方法代替*/
         if (this.filesToUpload.length && !this.isIE) {
@@ -166,7 +170,7 @@ let FileUpload = React.createClass({
         /*IE用iframe表单上传，其他用ajax Formdata*/
         let render = '';
         if (this.isIE) {
-            render = this.multiIEForm(currentIEID);
+            render = this.multiIEForm();
         } else {
             render = (
                 <div className={this.props.className} style={this.props.style}>
@@ -182,22 +186,32 @@ let FileUpload = React.createClass({
                         {this.state.uploadBtn}
                     </div>
                     {this.state.after}
-                    <input type="file" id="ajax_upload_file_input" name="ajax_upload_file_input"
-                            ref="ajax_upload_file_input" style={{display:"none"}} onChange={this.commonChange}/>
+                    <input type="file" name="ajax_upload_file_input" ref="ajax_upload_file_input" style={{display:"none"}} onChange={this.commonChange}/>
                 </div>
             )
         }
         return render;
     },
 
-    /*IE多文件同时上传，需要多个表单+多个form组合。根据currentIEID代表有多少个form。除了最后一个form（空闲）显示，其他为隐藏*/
-    //TODO 把上传完毕的form和frame重新变为空闲
-    multiIEForm(id){
+    /*IE多文件同时上传，需要多个表单+多个form组合。根据currentIEID代表有多少个form。*/
+    /*所有不在空闲（正在上传）的上传组都以display:none的形式插入，第一个空闲的上传组会display:block捕捉。*/
+    multiIEForm(){
         let formArr = [];
-        /*是否最后一个form*/
-        let isEnd = false;
-        for (let i = 0; i <= id; i++) {
-            insertIEForm.call(this,formArr,i);
+        let hasFree = false;
+
+        /*这里IEFormGroup的长度会变，所以不能存len*/
+        for(let i = 0; i<IEFormGroup.length ; i++){
+            insertIEForm.call(this,formArr,i)
+            /*如果当前上传组是空闲，hasFree=true，并且指定当前上传组ID*/
+            if(IEFormGroup[i] && !hasFree){
+                hasFree = true;
+                currentIEID = i;
+            }
+            /*如果所有上传组都不是空闲状态，push一个新增组*/
+            if( (i==IEFormGroup.length-1) && !hasFree){
+                IEFormGroup.push(true);
+            }
+
         }
 
         return (
@@ -207,13 +221,17 @@ let FileUpload = React.createClass({
         )
 
         function insertIEForm(formArr,i){
-            if (i == id) isEnd = true;
+            /*如果已经push了空闲组而当前也是空闲组*/
+            if(IEFormGroup[i] && hasFree) return;
+            /*是否display*/
+            let isShow = IEFormGroup[i];
+
             i = `${this.IETag}${i}`;
             formArr.push((
                 <form id={`ajax_upload_file_form_${i}`} method="post" target={`ajax_upload_file_frame_${i}`}
                       key={`ajax_upload_file_form_${i}`}
                       encType="multipart/form-data" ref={`form_${i}`} onSubmit={this.IEUpload}
-                      style={{display:isEnd? 'block':'none'}}>
+                      style={{display:isShow? 'block':'none'}}>
                     {this.state.before}
                     <div style={{overflow:'hidden',position:'relative',display:'inline-block'}}>{/*display处理IE显示问题*/}
                         {this.state.chooseBtn}
@@ -298,7 +316,7 @@ let FileUpload = React.createClass({
         this.chooseFile(this.fileName);
         /*先执行IEUpload，配置好action等参数，然后submit*/
         if (this.chooseAndUpload && (this.IEUpload() !== false)) {
-            document.getElementById(`ajax_upload_file_form_${this.IETag}${currentIEID - 1}`).submit();
+            document.getElementById(`ajax_upload_file_form_${this.IETag}${currentIEID}`).submit();
         }
         e.target.blur();
     },
@@ -336,7 +354,8 @@ let FileUpload = React.createClass({
         /*当前上传id*/
         let partIEID = currentIEID;
         /*回调函数*/
-        document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}`).attachEvent('onload',function(e){
+        //document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}`).attachEvent('onload',function(e){
+        $(`#ajax_upload_file_frame_${this.IETag}${partIEID}`).on('load',function(e){
             console.log('load', partIEID);
             try {
                 that.uploadSuccess(that.IECallback(that.dataType, partIEID));
@@ -349,11 +368,16 @@ let FileUpload = React.createClass({
             }
         });
         this.doUpload(this.fileName, mill, paramAddToFile);
-        currentIEID++;
+        /*置为非空闲*/
+        IEFormGroup[currentIEID] = false;
+
     },
     /*IE回调函数*/
     //TODO 处理Timeout
     IECallback(dataType, frameId){
+        /*回复空闲状态*/
+        IEFormGroup[frameId] = true;
+
         let frame = document.getElementById(`ajax_upload_file_frame_${this.IETag}${frameId}`);
         let resp = {};
         let content = frame.contentWindow ? frame.contentWindow.document.body : frame.contentDocument.document.body;
@@ -390,6 +414,9 @@ let FileUpload = React.createClass({
         if (!this.baseUrl) {
             throw new Error('BaseUrl missing in options');
         }
+        /*用于存放当前作用域的东西*/
+        let scope = {};
+        /*组装FormData*/
         let formData = new FormData();
         if (!this._withoutFileUpload) {
             for (let i = 0, len = this.files.length; i < len; i++) {
@@ -422,6 +449,19 @@ let FileUpload = React.createClass({
         xhr.open('POST', targeturl, true);
         //xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8');
 
+        /*处理超时。用定时器判断超时，不然xhr state=4 catch的错误无法判断是超时*/
+        if(this.timeout){
+            xhr.timeout = this.timeout;
+            xhr.ontimeout = function(e){
+                that.uploadError({type: 'TIMEOUTERROR', message: 'timeout'});
+                scope.isTimeout = false;
+            }
+            scope.isTimeout = false;
+            setTimeout(()=>{
+                scope.isTimeout = true;
+            },this.timeout)
+        }
+
         xhr.onreadystatechange = function () {
             /*xhr finish*/
             try {
@@ -434,12 +474,14 @@ let FileUpload = React.createClass({
                     that.uploadFail(resp)
                 }
             } catch (e) {
-                that.uploadError({type: 'FINISHERROR', message: e.message});
+                /*超时抛出不一样的错误*/
+                !scope.isTimeout && that.uploadError({type: 'FINISHERROR', message: e.message});
             }
         };
         /*xhr error*/
-        xhr.onerror = function () {
+        xhr.onerror = function (e) {
             try {
+                console.log('err',e)
                 let resp = that.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
                 that.uploadError({type: 'XHRERROR', message: resp});
             } catch (e) {
@@ -450,6 +492,7 @@ let FileUpload = React.createClass({
         xhr.onprogress = xhr.upload.onprogress = function (progress) {
             that.uploading(progress, mill);
         }
+
         /*不带文件上传，给秒传使用*/
         this._withoutFileUpload ? xhr.send(null) : xhr.send(formData);
 

@@ -72,6 +72,7 @@ dataType | `'json'/'text'`  | ``'json'`` | type of response.
 chooseAndUpload | boolean | ``false`` | whether the upload action will be triggered just after the user choose a file. If true, an DOM with the `ref='chooseAndUpload'` should be use as a child. default to false.
 paramAddToFile | array[string] | ``[]`` | an array that including names of params that need to append to the file instance(File ApI instance). default to [].
 wrapperDisplay | string | ``'inline-block'`` | the display of the wrappers of chooseBtn or uploadBtn. default to 'inline-block'.
+timeout | number | ``0`` | Timeout of the request, not support IE right now, when is timeout the `uploadError` will be triggered, and an object `{type:'TIMEOUTERROR',message:'timeout'}` will be return as the argument. default to 0 as no limit.
 
 
 
@@ -149,7 +150,7 @@ Multi form groups are required in IE. If there are multi-use of `<FileUpload>` i
 
 Send AJAX without the file(without the FormData).
 
-#### filesToUpload(abandoned) ####
+#### filesToUpload(deprecated) ####
 Use filesToUpload(files) of component functions instead.
 
 {array[File]}
@@ -334,6 +335,7 @@ dataType | `'json'/'text'` | ``'json'`` | 回应的格式
 chooseAndUpload | boolean | ``false`` | 是否在用户选择了文件之后立刻上传,如果为true则只需在children传入ref="chooseAndUpload"的DOM就可触发。默认false
 paramAddToFile | array[string] | ``[]`` | 需要添加到file对象（file API）上作为属性的param的名字数组。默认空
 wrapperDisplay | string | ``'inline-block'`` | 包裹chooseBtn或uploadBtn的div的display默认'inline-block'
+timeout | number | ``0`` | 请求的超时时间，暂不兼容IE，超时调用`uploadError`,返回`{type:'TIMEOUTERROR',message:'timeout'}`。默认为0没有超时限制
 
 
 
@@ -541,6 +543,10 @@ render(){
 
 
 ## Change-log ##
+
+### 1.1.1 ###
+- Add property `timeout`
+- Optimize logic of `IE form group`
 
 ### 1.1.0 ###
 - Add component function `filesToUpload`
