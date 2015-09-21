@@ -544,6 +544,9 @@ render(){
 
 ## Change-log ##
 
+### 1.1.2 ###
+- Fix a bug in 1.1.1, which will throw an error in IE
+
 ### 1.1.1 ###
 - Add property `timeout`
 - Optimize logic of `IE form group`

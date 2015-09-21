@@ -354,8 +354,8 @@ let FileUpload = React.createClass({
         /*当前上传id*/
         let partIEID = currentIEID;
         /*回调函数*/
-        //document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}`).attachEvent('onload',function(e){
-        $(`#ajax_upload_file_frame_${this.IETag}${partIEID}`).on('load',function(e){
+        document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}`).attachEvent('onload',function(e){
+        //$(`#ajax_upload_file_frame_${this.IETag}${partIEID}`).on('load',function(e){
             console.log('load', partIEID);
             try {
                 that.uploadSuccess(that.IECallback(that.dataType, partIEID));
