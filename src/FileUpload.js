@@ -19,6 +19,35 @@ let IEFormGroup = [true];
 
 let FileUpload = React.createClass({
 
+    /*类型验证*/
+    propTypes: {
+        options: React.PropTypes.shape({
+            /*basics*/
+            baseUrl: React.PropTypes.string.isRequired,
+            param: React.PropTypes.object,
+            dataType: React.PropTypes.string,
+            chooseAndUpload: React.PropTypes.bool,
+            paramAddToFile: React.PropTypes.arrayOf(React.PropTypes.string),
+            wrapperDisplay: React.PropTypes.string,
+            timeout: React.PropTypes.number,
+            /*specials*/
+            tag: React.PropTypes.string,
+            _withoutFileUpload: React.PropTypes.bool,
+            filesToUpload: React.PropTypes.arrayOf(React.PropTypes.object),
+            /*funcs*/
+            beforeChoose: React.PropTypes.func,
+            chooseFile: React.PropTypes.func,
+            beforeUpload: React.PropTypes.func,
+            doUpload: React.PropTypes.func,
+            uploading: React.PropTypes.func,
+            uploadSuccess: React.PropTypes.func,
+            uploadError: React.PropTypes.func,
+            uploadFail: React.PropTypes.func
+        }).isRequired,
+        style: React.PropTypes.object,
+        className: React.PropTypes.string
+    },
+
     getInitialState(){
         return {
             chooseBtn: {},       //选择按钮。如果chooseAndUpload=true代表选择并上传。
@@ -27,13 +56,6 @@ let FileUpload = React.createClass({
             middle: [],      //存放props.children中位于chooseBtn后，uploadBtn前的元素
             after: []        //存放props.children中位于uploadBtn后的元素,
         }
-
-    },
-
-    propTypes: {
-        options: React.PropTypes.object,
-        style: React.PropTypes.object,
-        className: React.PropTypes.string
     },
 
     componentWillMount(){
@@ -53,7 +75,6 @@ let FileUpload = React.createClass({
         return this.packRender();
     },
 
-
     /*根据props更新组件*/
     updateProps(props){
         this.isIE = this.checkIE() > 0;
@@ -66,7 +87,7 @@ let FileUpload = React.createClass({
         this.dataType = 'json';
         options.dataType && (options.dataType.toLowerCase() == 'text') && (this.dataType = 'text');
         this.wrapperDisplay = options.wrapperDisplay || 'inline-block';     //包裹chooseBtn或uploadBtn的div的display
-        this.timeout = options.timeout || 0;     //超时时间
+        this.timeout = (typeof options.timeout == 'number' && options.timeout > 0) ? options.timeout : 0;     //超时时间
 
         /*生命周期函数*/
         /**
@@ -119,8 +140,7 @@ let FileUpload = React.createClass({
          */
         this.uploadFail = options.uploadFail || emptyFunction;
 
-
-        this.files = options.files || false;        //保存需要上传的文件
+        this.files = options.files || this.files || false;        //保存需要上传的文件
         /*特殊内容*/
         this._withoutFileUpload = options._withoutFileUpload || false;      //不带文件上传，为了给秒传功能使用，不影响IE
         this.filesToUpload = options.filesToUpload || [];       //使用filesToUpload()方法代替

@@ -7,9 +7,8 @@
  * 现代浏览器采用AJAX（XHR2+File API）上传。低版本浏览器使用form+iframe上传。
  * 使用到ES6，需要经babel转译
  */
-
-let React = require('react');
 'use strict';
+var React = require('react');
 
 var emptyFunction = function emptyFunction() {
 };
@@ -21,6 +20,35 @@ var IEFormGroup = [true];
 var FileUpload = React.createClass({
     displayName: 'FileUpload',
 
+    /*类型验证*/
+    propTypes: {
+        options: React.PropTypes.shape({
+            /*basics*/
+            baseUrl: React.PropTypes.string.isRequired,
+            param: React.PropTypes.object,
+            dataType: React.PropTypes.string,
+            chooseAndUpload: React.PropTypes.bool,
+            paramAddToFile: React.PropTypes.arrayOf(React.PropTypes.string),
+            wrapperDisplay: React.PropTypes.string,
+            timeout: React.PropTypes.number,
+            /*specials*/
+            tag: React.PropTypes.string,
+            _withoutFileUpload: React.PropTypes.bool,
+            filesToUpload: React.PropTypes.arrayOf(React.PropTypes.object),
+            /*funcs*/
+            beforeChoose: React.PropTypes.func,
+            chooseFile: React.PropTypes.func,
+            beforeUpload: React.PropTypes.func,
+            doUpload: React.PropTypes.func,
+            uploading: React.PropTypes.func,
+            uploadSuccess: React.PropTypes.func,
+            uploadError: React.PropTypes.func,
+            uploadFail: React.PropTypes.func
+        }).isRequired,
+        style: React.PropTypes.object,
+        className: React.PropTypes.string
+    },
+
     getInitialState: function getInitialState() {
         return {
             chooseBtn: {}, //选择按钮。如果chooseAndUpload=true代表选择并上传。
@@ -29,12 +57,6 @@ var FileUpload = React.createClass({
             middle: [], //存放props.children中位于chooseBtn后，uploadBtn前的元素
             after: [] //存放props.children中位于uploadBtn后的元素,
         };
-    },
-
-    propTypes: {
-        options: React.PropTypes.object,
-        style: React.PropTypes.object,
-        className: React.PropTypes.string
     },
 
     componentWillMount: function componentWillMount() {
@@ -66,7 +88,7 @@ var FileUpload = React.createClass({
         this.dataType = 'json';
         options.dataType && options.dataType.toLowerCase() == 'text' && (this.dataType = 'text');
         this.wrapperDisplay = options.wrapperDisplay || 'inline-block'; //包裹chooseBtn或uploadBtn的div的display
-        this.timeout = options.timeout || 0; //超时时间
+        this.timeout = typeof options.timeout == 'number' && options.timeout > 0 ? options.timeout : 0; //超时时间
 
         /*生命周期函数*/
         /**
@@ -119,7 +141,7 @@ var FileUpload = React.createClass({
          */
         this.uploadFail = options.uploadFail || emptyFunction;
 
-        this.files = options.files || false; //保存需要上传的文件
+        this.files = options.files || this.files || false; //保存需要上传的文件
         /*特殊内容*/
         this._withoutFileUpload = options._withoutFileUpload || false; //不带文件上传，为了给秒传功能使用，不影响IE
         this.filesToUpload = options.filesToUpload || []; //使用filesToUpload()方法代替
@@ -385,8 +407,8 @@ var FileUpload = React.createClass({
         /*当前上传id*/
         var partIEID = currentIEID;
         /*回调函数*/
-        document.getElementById('ajax_upload_file_form_' + this.IETag + currentIEID).attachEvent('onload',function(e){
-        //$('#ajax_upload_file_frame_' + this.IETag + partIEID).on('load', function (e) {
+        document.getElementById('ajax_upload_file_frame_' + this.IETag + partIEID).attachEvent('onload', function (e) {
+            //$(`#ajax_upload_file_frame_${this.IETag}${partIEID}`).on('load',function(e){
             console.log('load', partIEID);
             try {
                 that.uploadSuccess(that.IECallback(that.dataType, partIEID));
