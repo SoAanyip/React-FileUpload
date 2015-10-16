@@ -5,7 +5,7 @@
 ##Index##
 ### EN ###
 *	[Introduce](#introduce)
-*   [Download](#download)
+*   [Download](#download)bu
 *	[API](#api-en)
 *	[License](#license)
 *	[Change-log](#change-log)
@@ -44,7 +44,7 @@ render(){
 	return (
 		<FileUpload options={options}>
 			<button ref="chooseBtn">choose</button>
-			<button ref="uploadBtn">upload<button>
+			<button ref="uploadBtn">upload</button>
 		</FIleUpload>
 	)	        
 }
@@ -220,7 +220,7 @@ You can just set two btns.
 ```
 <FileUpload options={options}>
 	<button ref="chooseBtn">choose</button>
-	<button ref="uploadBtn">upload<button>
+	<button ref="uploadBtn">upload</button>
 </FIleUpload>
 ```
 
@@ -238,7 +238,7 @@ Ofcourse btn is not necessary.
         <i className="icon icon-upload" />
         <span>do it</span>
     </div>
-    <button ref="uploadBtn">upload<button>
+    <button ref="uploadBtn">upload</button>
 </FIleUpload>
 ```
 
@@ -251,7 +251,7 @@ Other DOMs can also be set as children.
         <span>do it</span>
     </div>
     <p>You have uploaded {this.state.rate}</p>
-    <button ref="uploadBtn">upload<button>
+    <button ref="uploadBtn">upload</button>
     <p>Thanks for using</p>
 </FIleUpload>
 ```
@@ -307,7 +307,7 @@ render(){
 	return (
 		<FileUpload options={options}>
 			<button ref="chooseBtn">choose</button>
-			<button ref="uploadBtn">upload<button>
+			<button ref="uploadBtn">upload</button>
 		</FIleUpload>
 	)	        
 }
@@ -482,7 +482,7 @@ options:{
 ```
 <FileUpload options={options}>
 	<button ref="chooseBtn">choose</button>
-	<button ref="uploadBtn">upload<button>
+	<button ref="uploadBtn">upload</button>
 </FIleUpload>
 ```
 
@@ -500,7 +500,7 @@ options:{
         <i className="icon icon-upload" />
         <span>do it</span>
     </div>
-    <button ref="uploadBtn">upload<button>
+    <button ref="uploadBtn">upload</button>
 </FIleUpload>
 ```
 
@@ -513,7 +513,7 @@ options:{
         <span>do it</span>
     </div>
     <p>You have uploaded {this.state.rate}</p>
-    <button ref="uploadBtn">upload<button>
+    <button ref="uploadBtn">upload</button>
     <p>Thanks for using</p>
 </FIleUpload>
 ```
