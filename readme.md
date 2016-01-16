@@ -34,7 +34,7 @@ var FileUpload = require('react-fileupload');
 render(){
 	/*set properties*/
 	var options={
-		basUrl:'http://127.0.0.1',
+		baseUrl:'http://127.0.0.1',
 		param:{
 			fid:0
 		}
@@ -45,7 +45,7 @@ render(){
 		<FileUpload options={options}>
 			<button ref="chooseBtn">choose</button>
 			<button ref="uploadBtn">upload</button>
-		</FIleUpload>
+		</FileUpload>
 	)	        
 }
 ```
@@ -221,14 +221,14 @@ You can just set two btns.
 <FileUpload options={options}>
 	<button ref="chooseBtn">choose</button>
 	<button ref="uploadBtn">upload</button>
-</FIleUpload>
+</FileUpload>
 ```
 
 Or if you set the `chooseAndUpload` to true, you need to set only one with `ref="chooseAndUpload"`.
 ```
 <FileUpload options={options}>
     <button ref="chooseAndUpload">chooseAndUpload</button>
-</FIleUpload>
+</FileUpload>
 ```
 
 Ofcourse btn is not necessary.
@@ -239,7 +239,7 @@ Ofcourse btn is not necessary.
         <span>do it</span>
     </div>
     <button ref="uploadBtn">upload</button>
-</FIleUpload>
+</FileUpload>
 ```
 
 Other DOMs can also be set as children.
@@ -253,7 +253,7 @@ Other DOMs can also be set as children.
     <p>You have uploaded {this.state.rate}</p>
     <button ref="uploadBtn">upload</button>
     <p>Thanks for using</p>
-</FIleUpload>
+</FileUpload>
 ```
 
 
@@ -297,7 +297,7 @@ var FileUpload = require('react-fileupload');
 render(){
 	/*指定参数*/
 	var options={
-		basUrl:'http://127.0.0.1',
+		baseUrl:'http://127.0.0.1',
 		param:{
 			fid:0
 		}
@@ -308,7 +308,7 @@ render(){
 		<FileUpload options={options}>
 			<button ref="chooseBtn">choose</button>
 			<button ref="uploadBtn">upload</button>
-		</FIleUpload>
+		</FileUpload>
 	)	        
 }
 ```
@@ -483,14 +483,14 @@ options:{
 <FileUpload options={options}>
 	<button ref="chooseBtn">choose</button>
 	<button ref="uploadBtn">upload</button>
-</FIleUpload>
+</FileUpload>
 ```
 
 如果选择chooseAndUpload为true，则需要传入一个，且ref为chooseAndUpload
 ```
 <FileUpload options={options}>
     <button ref="chooseAndUpload">chooseAndUpload</button>
-</FIleUpload>
+</FileUpload>
 ```
 
 当然并不一定是btn
@@ -501,7 +501,7 @@ options:{
         <span>do it</span>
     </div>
     <button ref="uploadBtn">upload</button>
-</FIleUpload>
+</FileUpload>
 ```
 
 在这中间也可以插入其他DOM
@@ -515,7 +515,7 @@ options:{
     <p>You have uploaded {this.state.rate}</p>
     <button ref="uploadBtn">upload</button>
     <p>Thanks for using</p>
-</FIleUpload>
+</FileUpload>
 ```
 
 ### 组件方法 ###
