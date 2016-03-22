@@ -2,10 +2,12 @@
 
 ![npm version](https://badge.fury.io/js/react-fileupload.svg)
 
-##Index##
+## Index ##
+
+
 ### EN ###
 *	[Introduce](#introduce)
-*   [Download](#download)bu
+*   [Download](#download)
 *	[API](#api-en)
 *	[License](#license)
 *	[Change-log](#change-log)
@@ -19,22 +21,20 @@
 *	[Change-log](#change-log)
 
 ## Introduce ##
-1. A React component of async file uploading, using File API+FormData in modern browser, and form+iframe in IE.
+1. A React component of async file uploading, using File API+FormData in modern browser, and form+iframe in IE9-. If want to use in IE8, use es5-shim or so.
 2. With help of ES6, so babel is required.
-3. When in IE, an invisible `<input>` will be put over the chooseBtn so that it can catch the click event. It is simpler in moderns because the event will be caught by the wrapper.
-4. `Progress` is supported by the moderns to show the progress of uploading.
+3. When in IE9-, an invisible `<input>` will be put over the chooseBtn so that it can catch the click event. It is simpler in moderns because the event will be caught by the wrapper.
 5. Life circle functions.
 6. No preset styles. Just use your favorite. 
-7. **multi-upload has not been supported yet**
 
 ### Get started ###
 ```
-var FileUpload = require('react-fileupload');
+const FileUpload = require('react-fileupload');
 ...
 render(){
 	/*set properties*/
-	var options={
-		baseUrl:'http://127.0.0.1',
+	const options={
+		basUrl:'http://127.0.0.1',
 		param:{
 			fid:0
 		}
@@ -44,14 +44,14 @@ render(){
 	return (
 		<FileUpload options={options}>
 			<button ref="chooseBtn">choose</button>
-			<button ref="uploadBtn">upload</button>
-		</FileUpload>
+			<button ref="uploadBtn">upload<button>
+		</FIleUpload>
 	)	        
 }
 ```
 
 ## Download ##
-`npm install react-fileupload`
+`npm install react-fileupload --save`
 
 ## API-EN ##
 
@@ -62,7 +62,7 @@ options:{
     ...
 }
 ```
-`options` is an attribute of `<FileUpload>`. The properties of `options` are: 
+`options` is an attribute of `<FileUpload />`. The properties of `options` are: 
 
 name | type | default | note
 ------------ | ------------- | ------------ | ------------
@@ -70,10 +70,14 @@ baseUrl | string | ``''`` | url
 param | object | ``{}`` | params that appended after baseUrl.
 dataType | `'json'/'text'`  | ``'json'`` | type of response.
 chooseAndUpload | boolean | ``false`` | whether the upload action will be triggered just after the user choose a file. If true, an DOM with the `ref='chooseAndUpload'` should be use as a child. default to false.
-paramAddToFile | array[string] | ``[]`` | an array that including names of params that need to append to the file instance(File ApI instance). default to [].
+paramAddToFile(deprecated) | array[string] | ``[]`` | an array that including names of params that need to append to the file instance(File ApI instance). default to [].
 wrapperDisplay | string | ``'inline-block'`` | the display of the wrappers of chooseBtn or uploadBtn. default to 'inline-block'.
-timeout | number | ``0`` | Timeout of the request, not support IE right now, when is timeout the `uploadError` will be triggered, and an object `{type:'TIMEOUTERROR',message:'timeout'}` will be return as the argument. default to 0 as no limit.
-
+timeout | number | ``0`` | Timeout of the request, not support IE9- right now, when is timeout the `uploadError` will be triggered, and an object `{type:'TIMEOUTERROR',message:'timeout'}` will be return as the argument. default to 0 as no limit.
+paramAddToField | object/func | ``undefined`` | Key-value that need to add to  formData. When it is a function, use the return.
+accept | string | ``''`` | Limit the type (extension) of file.
+multiple | boolean | ``false`` | Allow multi-upload or not. Not supporting IE9-.
+numberLimit | number/func | false | Limit how much file that user can choose in multi-upload case.User can still choose but FileUpload will filter.
+fileFieldName | string | false | When a file is added to formData, defaulting file name as key. So if you want to use other file property as key, pass the name of this property.
 
 
 ### Life circle functions ###
@@ -89,14 +93,14 @@ Triggered after clicking the `chooseBtn` and before choosing file. return true t
 #### chooseFile(files) ####
 The callback triggered after choosing.
 
-@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE it will be the full name of file.
+@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE9- it will be the full name of file.
 
 @return
 
 #### beforeUpload(files,mill) ####
 Triggered before uploading. return true to continue or false to stop uploading.
 
-@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE it will be the full name of file.
+@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE9- it will be the full name of file.
 
 @param mill {long} The time of the upload action (millisecond). If the File instance has the `mill` property it will be the same as it.
 
@@ -105,7 +109,7 @@ Triggered before uploading. return true to continue or false to stop uploading.
 #### doUpload(files,mill) ####
 Triggered after the request is sent(xhr send | form submit).
 
-@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE it will be the full name of file.
+@param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE9- it will be the full name of file.
 
 @param mill {long} The time of the upload action (millisecond). If the File instance has the `mill` property it will be the same as it.
 
@@ -150,6 +154,10 @@ Multi form groups are required in IE. If there are multi-use of `<FileUpload>` i
 
 Send AJAX without the file(without the FormData).
 
+#### disabledIEChoose ####
+{boolean | func}
+In IE, the upload button is actually covered by an invisible `<input />` , and the `disabled` attribute for button will not work. So set this property as `true` (function return true) to disabled choose behavior.
+
 #### filesToUpload(deprecated) ####
 Use filesToUpload(files) of component functions instead.
 
@@ -167,10 +175,14 @@ options:{
         name:'123',
         category: '1'
     },
-    chooseAndUpload : false,
-    paramAddToFile : ['category'],
     dataType : 'json',
     wrapperDisplay : 'inline-block',
+    multiple: 'true',
+    numberLimit: 9,
+    accept: 'image/*',
+    chooseAndUpload : false,
+    paramAddToField : {purpose: 'save'},
+    fileFieldName : 'name',
     beforeChoose : function()[
         return user.isAllowUpload;
     },
@@ -178,7 +190,7 @@ options:{
         console.log('you choose',typeof files == 'string' ? files : files[0].name);
     },
     beforeUpload : function(files,mill){
-        if(typeof files == string) return false;
+        if(typeof files == string) return true;
         if(files[0].size<1024*1024*20){
             files[0].mill = mill;
             return true;
@@ -220,15 +232,15 @@ You can just set two btns.
 ```
 <FileUpload options={options}>
 	<button ref="chooseBtn">choose</button>
-	<button ref="uploadBtn">upload</button>
-</FileUpload>
+	<button ref="uploadBtn">upload<button>
+</FIleUpload>
 ```
 
 Or if you set the `chooseAndUpload` to true, you need to set only one with `ref="chooseAndUpload"`.
 ```
 <FileUpload options={options}>
     <button ref="chooseAndUpload">chooseAndUpload</button>
-</FileUpload>
+</FIleUpload>
 ```
 
 Ofcourse btn is not necessary.
@@ -238,8 +250,8 @@ Ofcourse btn is not necessary.
         <i className="icon icon-upload" />
         <span>do it</span>
     </div>
-    <button ref="uploadBtn">upload</button>
-</FileUpload>
+    <button ref="uploadBtn">upload<button>
+</FIleUpload>
 ```
 
 Other DOMs can also be set as children.
@@ -251,9 +263,9 @@ Other DOMs can also be set as children.
         <span>do it</span>
     </div>
     <p>You have uploaded {this.state.rate}</p>
-    <button ref="uploadBtn">upload</button>
+    <button ref="uploadBtn">upload<button>
     <p>Thanks for using</p>
-</FileUpload>
+</FIleUpload>
 ```
 
 
@@ -280,15 +292,20 @@ IF there is file(File instance) that need to be uploaded immediately,use this fu
 
 @return null
 
+#### forwardChoose ####
+Do the same as clicking `chooseBtn` . Only support modern browsers.
+
+@param null
+
+@return null
+
 
 ## 简介 ##
-1. React文件上传组件，现代浏览器采用File API+FormData异步上传，兼容IE8+使用form+iframe异步上传。
+1. React文件上传组件，现代浏览器采用File API+FormData异步上传，兼容IE9使用form+iframe异步上传。(babel6不兼容IE8，如需在IE8使用请再次转换)
 2. 使用到ES6，需要经babel转译。
 3. IE通过把透明的上传按钮覆盖在传入的children的上传按钮上进行点击的捕捉。同时隐藏iframe。现代浏览器通过传入的按钮上再增加一层wrapper来捕捉。
-4. 现代浏览器支持progress，从而显示上传进度
 5. 丰富的生命周期函数
 6. 不包含预设样式，开放式组件 
-7. **暂时不支持多文件同时上传**
 
 简单使用方式：
 ```
@@ -297,7 +314,7 @@ var FileUpload = require('react-fileupload');
 render(){
 	/*指定参数*/
 	var options={
-		baseUrl:'http://127.0.0.1',
+		basUrl:'http://127.0.0.1',
 		param:{
 			fid:0
 		}
@@ -307,18 +324,18 @@ render(){
 	return (
 		<FileUpload options={options}>
 			<button ref="chooseBtn">choose</button>
-			<button ref="uploadBtn">upload</button>
-		</FileUpload>
+			<button ref="uploadBtn">upload<button>
+		</FIleUpload>
 	)	        
 }
 ```
 
 ## 下载 ##
-`npm install react-fileupload`
+`npm install react-fileupload --save`
 
 ## API-CN ##
 
-### options ###
+### options ###                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 ```
 options:{
     baseUrl:'xxx',
@@ -333,9 +350,14 @@ baseUrl | string | ``''`` | 目标域名
 param | object | ``{}`` | 作为get参数配置在域名之后
 dataType | `'json'/'text'` | ``'json'`` | 回应的格式
 chooseAndUpload | boolean | ``false`` | 是否在用户选择了文件之后立刻上传,如果为true则只需在children传入ref="chooseAndUpload"的DOM就可触发。默认false
-paramAddToFile | array[string] | ``[]`` | 需要添加到file对象（file API）上作为属性的param的名字数组。默认空
 wrapperDisplay | string | ``'inline-block'`` | 包裹chooseBtn或uploadBtn的div的display默认'inline-block'
-timeout | number | ``0`` | 请求的超时时间，暂不兼容IE，超时调用`uploadError`,返回`{type:'TIMEOUTERROR',message:'timeout'}`。默认为0没有超时限制
+timeout | number | ``0`` | 请求的超时时间，暂不兼容IE9-，超时调用`uploadError`,返回`{type:'TIMEOUTERROR',message:'timeout'}`。默认为0没有超时限制
+paramAddToField | object/func | ``undefined`` | 添加到formData上的参数键值对。func时取返回值。
+accept | string | ``''`` | 限制选择文件的类型（后缀）
+multiple | boolean | ``false`` | 是否允许同时选择多文件）不支持IE9-
+numberLimit | number/func | false | 多文件上传时限制用户选择的数量（用户仍可以选择，但是会在选择后进行过滤）
+fileFieldName | string | false | 文件添加到formData时，默认用file.name作为key。传入string指定一个file的属性名，formData的key就为其属性的值
+
 
 
 
@@ -375,9 +397,9 @@ timeout | number | ``0`` | 请求的超时时间，暂不兼容IE，超时调用
 @return
 
 #### uploading(progress) ####
-在文件上传中的时候，现代浏览器会不断触发此函数
+在文件上传中的时候，浏览器会不断触发此函数，IE9-为虚拟的进度
 
-@param progress {Progress} progress对象，里面存有例如上传进度loaded和文件大小total等属性
+@param progress {Progress} progress对象，里面存有例如上传进度loaded和文件大小total等属性，IE9-只有loaded和total属性，且loaded为100
 
 @return
 
@@ -413,6 +435,10 @@ IE上传需要多个form组，如需在一个页面引入多个<FileUpload>，�
 
 不带文件上传(不构造FormData对象)，为了给秒传功能使用，不影响IE
 
+#### disabledIEChoose ####
+{boolean | func}
+IE情况下，由于上传按钮被隐藏的input覆盖，不能进行disabled按钮处理。所以当disabledIEChoose为true（或者func返回值为true）时，禁止IE上传。
+
 #### filesToUpload(废弃) ####
 使用组件方法filesToUpload(files)代替。
 
@@ -429,10 +455,14 @@ options:{
         name:'123',
         category: '1'
     },
-    chooseAndUpload : false,
-    paramAddToFile : ['category'],
     dataType : 'json',
     wrapperDisplay : 'inline-block',
+    multiple: 'true',
+    numberLimit: 9,
+    accept: 'image/*',
+    chooseAndUpload : false,
+    paramAddToField : {purpose: 'save'},
+    fileFieldName : 'name',
     beforeChoose : function()[
         return user.isAllowUpload;
     },
@@ -440,7 +470,7 @@ options:{
         console.log('you choose',typeof files == 'string' ? files : files[0].name);
     },
     beforeUpload : function(files,mill){
-        if(typeof files == string) return false;
+        if(typeof files == string) return true;
         if(files[0].size<1024*1024*20){
             files[0].mill = mill;
             return true;
@@ -482,15 +512,15 @@ options:{
 ```
 <FileUpload options={options}>
 	<button ref="chooseBtn">choose</button>
-	<button ref="uploadBtn">upload</button>
-</FileUpload>
+	<button ref="uploadBtn">upload<button>
+</FIleUpload>
 ```
 
 如果选择chooseAndUpload为true，则需要传入一个，且ref为chooseAndUpload
 ```
 <FileUpload options={options}>
     <button ref="chooseAndUpload">chooseAndUpload</button>
-</FileUpload>
+</FIleUpload>
 ```
 
 当然并不一定是btn
@@ -500,8 +530,8 @@ options:{
         <i className="icon icon-upload" />
         <span>do it</span>
     </div>
-    <button ref="uploadBtn">upload</button>
-</FileUpload>
+    <button ref="uploadBtn">upload<button>
+</FIleUpload>
 ```
 
 在这中间也可以插入其他DOM
@@ -513,9 +543,9 @@ options:{
         <span>do it</span>
     </div>
     <p>You have uploaded {this.state.rate}</p>
-    <button ref="uploadBtn">upload</button>
+    <button ref="uploadBtn">upload<button>
     <p>Thanks for using</p>
-</FileUpload>
+</FIleUpload>
 ```
 
 ### 组件方法 ###
@@ -541,8 +571,27 @@ render(){
 
 @return null
 
+#### forwardChoose ####
+主动触发选择文件（等同于调用btn.click()), 仅支持现代浏览器
+
+@param null
+
+@return null
+
 
 ## Change-log ##
+
+### 2.0.0 ###
+- Update lib (babel6+), *not supporting IE8 by default, you can use es5-shim or so to rebuild.*
+- *DELETE* property `paramsAddToFile` in options. Just add your params to formData.
+- Now supporting multiple upload, add property `multiple`
+- Add property `numberLimit`
+- Add property `accept`
+- Add property `fileFieldName`
+- Add special property `disabledIEChoose`
+- Add component function `forwardChoose`
+- `Uploading` is now supporting IE9-, but just using inteval to create percentage.
+
 
 ### 1.1.3 ###
 - Add `PropTypes`
@@ -559,7 +608,7 @@ render(){
 - Add special property `tag`
 
 ### 1.0.1 ###
-init
+- init
 
 ## License ##
 MIT	

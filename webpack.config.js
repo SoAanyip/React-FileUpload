@@ -6,9 +6,6 @@ var path = require('path');
 
 var webpack = require('webpack');
 
-var commonsPlugin =
-    new webpack.optimize.CommonsChunkPlugin('common.js');
-
 module.exports = {
     entry: './src/FileUpload.js',
 
@@ -17,18 +14,12 @@ module.exports = {
         filename: "[name].js",
     },
 
-
     module: {
         loaders: [
             {
                 test: /\.js$/,
-                loader: "jsx!babel"
+                loader: 'babel',
             }
         ]
     },
-
-    plugins: [
-        commonsPlugin,
-    ],
-
 };
