@@ -1,6 +1,6 @@
 {
   "name": "react-fileupload",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Upload files async with xhr2 or iframe for IE. Supporting IE8+. Doing well in Tencent.",
   "main": "dist/main.js",
   "scripts": {
@@ -22,8 +22,7 @@
   "author": "Cheesu@Tencent",
   "license": "MIT",
   "dependencies": {
-    "lodash": "^4.6.1",
-    "react": "^0.14.7"
+    "react": "^15.0.2"
   },
   "devDependencies": {
     "babel-core": "^6.7.2",

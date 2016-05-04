@@ -581,6 +581,10 @@ render(){
 
 ## Change-log ##
 
+### 2.0.2 ###
+- fix bug in main.js
+- update dependency `react` to `^15.0.2` 
+
 ### 2.0.0 ###
 - Update lib (babel6+), *not supporting IE8 by default, you can use es5-shim or so to rebuild.*
 - *DELETE* property `paramsAddToFile` in options. Just add your params to formData.
