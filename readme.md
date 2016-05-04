@@ -34,7 +34,7 @@ const FileUpload = require('react-fileupload');
 render(){
 	/*set properties*/
 	const options={
-		basUrl:'http://127.0.0.1',
+		baseUrl:'http://127.0.0.1',
 		param:{
 			fid:0
 		}
@@ -314,7 +314,7 @@ var FileUpload = require('react-fileupload');
 render(){
 	/*指定参数*/
 	var options={
-		basUrl:'http://127.0.0.1',
+		baseUrl:'http://127.0.0.1',
 		param:{
 			fid:0
 		}
