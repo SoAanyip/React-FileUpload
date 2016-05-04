@@ -44,7 +44,7 @@ render(){
 	return (
 		<FileUpload options={options}>
 			<button ref="chooseBtn">choose</button>
-			<button ref="uploadBtn">upload<button>
+			<button ref="uploadBtn">upload</button>
 		</FIleUpload>
 	)	        
 }
