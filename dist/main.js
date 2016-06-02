@@ -1,3 +1,4 @@
+
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -40,7 +41,7 @@ var FileUpload = React.createClass({
             accept: React.PropTypes.string,
             multiple: React.PropTypes.bool,
             numberLimit: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.func]),
-            fileFieldName: React.PropTypes.string,
+            fileFieldName: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.func]),
             /*specials*/
             tag: React.PropTypes.string,
             disabledIEChoose: React.PropTypes.oneOfType([React.PropTypes.bool, React.PropTypes.func]),
@@ -386,14 +387,22 @@ var FileUpload = React.createClass({
         /*组装FormData*/
         var formData = new FormData();
         if (!this._withoutFileUpload) {
-            (function () {
-                var fieldName = _this3.fileFieldName ? _this3.fileFieldName : 'name';
-                Object.keys(_this3.files).forEach(function (key) {
+            var fieldNameType = _typeof(this.fileFieldName);
+            if (fieldNameType == 'string') {
+                Object.keys(this.files).forEach(function (key) {
                     if (key == 'length') return;
                     var file = _this3.files[key];
-                    formData.append(file[fieldName], file);
+                    formData.append(_this3.fileFieldName, file);
                 });
-            })();
+            } else {
+                Object.keys(this.files).forEach(function (key) {
+                    if (key == 'length') return;
+                    var file = _this3.files[key];
+                    var fileFieldName = _this3.fileFieldName(file);
+                    formData.append(fileFieldName, file);
+                });
+            }
+            var fieldName = this.fileFieldName ? this.fileFieldName : 'name';
         }
         /*组装自定义添加到FormData的对象*/
 

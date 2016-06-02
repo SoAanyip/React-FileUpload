@@ -9,7 +9,7 @@
  */
 
 /*eslint indent: 0 */
-const React = require('react')
+//const React = require('react')
 const emptyFunction = function() {}
 /*当前IE上传组的id*/
 let currentIEID = 0
@@ -32,7 +32,7 @@ const FileUpload = React.createClass({
             accept: React.PropTypes.string,
             multiple: React.PropTypes.bool,
             numberLimit: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.func]),
-            fileFieldName: React.PropTypes.string,
+            fileFieldName: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.func]),
             /*specials*/
             tag: React.PropTypes.string,
             disabledIEChoose: React.PropTypes.oneOfType([React.PropTypes.bool, React.PropTypes.func]),
@@ -366,12 +366,23 @@ const FileUpload = React.createClass({
         /*组装FormData*/
         const formData = new FormData()
         if (!this._withoutFileUpload) {
-            const fieldName = this.fileFieldName ? this.fileFieldName : 'name'
-            Object.keys(this.files).forEach(key => {
+            const fieldNameType = typeof this.fileFieldName
+            if(fieldNameType == 'string') {
+                Object.keys(this.files).forEach(key => {
+                    if(key == 'length') return
+                    const file = this.files[key]
+                    formData.append(this.fileFieldName, file)
+                })
+            }else {
+                Object.keys(this.files).forEach(key => {
                 if(key == 'length') return
                 const file = this.files[key]
-                formData.append(file[fieldName], file)
+                const fileFieldName = this.fileFieldName(file)
+                formData.append(fileFieldName, file)
             })
+            }
+            const fieldName = this.fileFieldName ? this.fileFieldName : 'name'
+            
         }
         /*组装自定义添加到FormData的对象*/
 

@@ -77,8 +77,7 @@ paramAddToField | object/func | ``undefined`` | Key-value that need to add to  f
 accept | string | ``''`` | Limit the type (extension) of file.
 multiple | boolean | ``false`` | Allow multi-upload or not. Not supporting IE9-.
 numberLimit | number/func | false | Limit how much file that user can choose in multi-upload case.User can still choose but FileUpload will filter.
-fileFieldName | string | false | When a file is added to formData, defaulting file name as key. So if you want to use other file property as key, pass the name of this property.
-
+fileFieldName | string/func | false | When a file is added to formData, defaulting file name as key. When is a string, use it. And When is a func, use return value. Func will receive the File object as argument.
 
 ### Life circle functions ###
 Also set as the properties of options.
@@ -182,7 +181,8 @@ options:{
     accept: 'image/*',
     chooseAndUpload : false,
     paramAddToField : {purpose: 'save'},
-    fileFieldName : 'name',
+    fileFieldName : 'file',
+    //fileFieldName(file){ return file.name },
     beforeChoose : function()[
         return user.isAllowUpload;
     },
@@ -356,7 +356,7 @@ paramAddToField | object/func | ``undefined`` | 添加到formData上的参数键
 accept | string | ``''`` | 限制选择文件的类型（后缀）
 multiple | boolean | ``false`` | 是否允许同时选择多文件）不支持IE9-
 numberLimit | number/func | false | 多文件上传时限制用户选择的数量（用户仍可以选择，但是会在选择后进行过滤）
-fileFieldName | string | false | 文件添加到formData时，默认用file.name作为key。传入string指定一个file的属性名，formData的key就为其属性的值
+fileFieldName | string/func | false | 文件添加到formData时，默认用file.name作为key。传入string会直接使用此string作为key，若为func则取返回值，func的参数为对应的file对象。
 
 
 
@@ -462,7 +462,8 @@ options:{
     accept: 'image/*',
     chooseAndUpload : false,
     paramAddToField : {purpose: 'save'},
-    fileFieldName : 'name',
+    fileFieldName : 'file',
+    //fileFieldName(file){ return file.name },
     beforeChoose : function()[
         return user.isAllowUpload;
     },
@@ -581,9 +582,12 @@ render(){
 
 ## Change-log ##
 
+### 2.1.0 ###
+- Update property `fileFieldName`, can be string or func.
+
 ### 2.0.2 ###
-- fix bug in main.js
-- update dependency `react` to `^15.0.2` 
+- Fix bug in main.js
+- Update dependency `react` to `^15.0.2` 
 
 ### 2.0.0 ###
 - Update lib (babel6+), *not supporting IE8 by default, you can use es5-shim or so to rebuild.*
