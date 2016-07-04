@@ -1,25 +1,21 @@
-/**
- *
- * Created by yikazhu on 2015/7/17.
- */
 var path = require('path');
 
-var webpack = require('webpack');
-
 module.exports = {
-    entry: './src/FileUpload.js',
-
+    entry: path.resolve(__dirname, 'src/index.js'),
     output: {
-        path: path.join(__dirname, "dist"),
-        filename: "[name].js",
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    module:{
+        loaders: [{
+            test: /\.jsx?$/,
+            loader: "babel",
+            query: {
+              presets: ['react','es2015']
+            },
+            //include: path.resolve(__dirname),
+            /*exclude: "/node_modules/"*/
+        }]
     },
 
-    module: {
-        loaders: [
-            {
-                test: /\.js$/,
-                loader: 'babel',
-            }
-        ]
-    },
-};
+}

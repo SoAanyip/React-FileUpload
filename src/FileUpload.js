@@ -9,47 +9,57 @@
  */
 
 /*eslint indent: 0 */
-//const React = require('react')
+const React = require('react')
 const emptyFunction = function() {}
 /*当前IE上传组的id*/
 let currentIEID = 0
 /*存放当前IE上传组的可用情况*/
 const IEFormGroup = [true]
+const {PropTypes} = React
 
 const FileUpload = React.createClass({
 
     /*类型验证*/
     propTypes: {
-        options: React.PropTypes.shape({
+        /*children(props) {
+            if(!props.children) return null
+            
+            const children =  Array.isArray(props.children) ? props.children : [props.children]
+            if( children.some(prop=>prop === undefined || prop === null) ) 
+                return new Error('Children should not be null, undefined or something like this. Check the children that you passed inside <FileUpload>.')
+            
+            return null
+        },*/
+        options: PropTypes.shape({
             /*basics*/
-            baseUrl: React.PropTypes.string.isRequired,
-            param: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.func]),
-            dataType: React.PropTypes.string,
-            chooseAndUpload: React.PropTypes.bool,
-            paramAddToField: React.PropTypes.oneOfType([React.PropTypes.object, React.PropTypes.func]),
-            wrapperDisplay: React.PropTypes.string,
-            timeout: React.PropTypes.number,
-            accept: React.PropTypes.string,
-            multiple: React.PropTypes.bool,
-            numberLimit: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.func]),
-            fileFieldName: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.func]),
+            baseUrl: PropTypes.string.isRequired,
+            param: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+            dataType: PropTypes.string,
+            chooseAndUpload: PropTypes.bool,
+            paramAddToField: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+            wrapperDisplay: PropTypes.string,
+            timeout: PropTypes.number,
+            accept: PropTypes.string,
+            multiple: PropTypes.bool,
+            numberLimit: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
+            fileFieldName: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
             /*specials*/
-            tag: React.PropTypes.string,
-            disabledIEChoose: React.PropTypes.oneOfType([React.PropTypes.bool, React.PropTypes.func]),
-            _withoutFileUpload: React.PropTypes.bool,
-            filesToUpload: React.PropTypes.arrayOf(React.PropTypes.object),
+            tag: PropTypes.string,
+            disabledIEChoose: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+            _withoutFileUpload: PropTypes.bool,
+            filesToUpload: PropTypes.arrayOf(PropTypes.object),
             /*funcs*/
-            beforeChoose: React.PropTypes.func,
-            chooseFile: React.PropTypes.func,
-            beforeUpload: React.PropTypes.func,
-            doUpload: React.PropTypes.func,
-            uploading: React.PropTypes.func,
-            uploadSuccess: React.PropTypes.func,
-            uploadError: React.PropTypes.func,
-            uploadFail: React.PropTypes.func
+            beforeChoose: PropTypes.func,
+            chooseFile: PropTypes.func,
+            beforeUpload: PropTypes.func,
+            doUpload: PropTypes.func,
+            uploading: PropTypes.func,
+            uploadSuccess: PropTypes.func,
+            uploadError: PropTypes.func,
+            uploadFail: PropTypes.func
         }).isRequired,
-        style: React.PropTypes.object,
-        className: React.PropTypes.string
+        style: PropTypes.object,
+        className: PropTypes.string
     },
 
     /*根据props更新组件*/
@@ -148,7 +158,7 @@ const FileUpload = React.createClass({
         const before = [], middle = [], after = []
         if (this.chooseAndUpload) {
             React.Children.forEach(props.children, (child)=> {
-                if (child.ref == 'chooseAndUpload') {
+                if (child && child.ref == 'chooseAndUpload') {
                     chooseBtn = child
                     flag++
                 } else {
@@ -157,10 +167,10 @@ const FileUpload = React.createClass({
             })
         } else {
             React.Children.forEach(props.children, (child)=> {
-                if (child.ref == 'chooseBtn') {
+                if (child && child.ref == 'chooseBtn') {
                     chooseBtn = child
                     flag++
-                } else if (child.ref == 'uploadBtn') {
+                } else if (child && child.ref == 'uploadBtn') {
                     uploadBtn = child
                     flag++
                 } else {
