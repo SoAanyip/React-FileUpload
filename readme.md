@@ -582,6 +582,9 @@ render(){
 
 ## Change-log ##
 
+### 2.1.2 ###
+- Fix #7, unexpected error on `fileFIeldName`.
+
 ### 2.1.1 ###
 - Fix #6, when passing undefined and null as child, a TypeError is raised.
 

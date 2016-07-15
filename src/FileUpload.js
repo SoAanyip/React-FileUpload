@@ -377,20 +377,24 @@ const FileUpload = React.createClass({
         const formData = new FormData()
         if (!this._withoutFileUpload) {
             const fieldNameType = typeof this.fileFieldName
-            if(fieldNameType == 'string') {
-                Object.keys(this.files).forEach(key => {
-                    if(key == 'length') return
+
+            /*判断是用什么方式作为formdata item 的 name*/
+            Object.keys(this.files).forEach(key => {
+                if(key == 'length') return
+
+                if(fieldNameType == 'function') {
+                    const file = this.files[key]
+                    const fileFieldName = this.fileFieldName(file)
+                    formData.append(fileFieldName, file)
+                }else if(fieldNameType == 'string') {
                     const file = this.files[key]
                     formData.append(this.fileFieldName, file)
-                })
-            }else {
-                Object.keys(this.files).forEach(key => {
-                if(key == 'length') return
-                const file = this.files[key]
-                const fileFieldName = this.fileFieldName(file)
-                formData.append(fileFieldName, file)
+                }else {
+                    const file = this.files[key]
+                    formData.append(file.name, file)
+                }
             })
-            }
+
             const fieldName = this.fileFieldName ? this.fileFieldName : 'name'
             
         }

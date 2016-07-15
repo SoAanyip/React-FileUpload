@@ -1,3 +1,4 @@
+
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -31,6 +32,15 @@ var FileUpload = React.createClass({
 
     /*类型验证*/
     propTypes: {
+        /*children(props) {
+            if(!props.children) return null
+            
+            const children =  Array.isArray(props.children) ? props.children : [props.children]
+            if( children.some(prop=>prop === undefined || prop === null) ) 
+                return new Error('Children should not be null, undefined or something like this. Check the children that you passed inside <FileUpload>.')
+            
+            return null
+        },*/
         options: PropTypes.shape({
             /*basics*/
             baseUrl: PropTypes.string.isRequired,
@@ -389,22 +399,28 @@ var FileUpload = React.createClass({
         /*组装FormData*/
         var formData = new FormData();
         if (!this._withoutFileUpload) {
-            var fieldNameType = _typeof(this.fileFieldName);
-            if (fieldNameType == 'string') {
-                Object.keys(this.files).forEach(function (key) {
+            (function () {
+                var fieldNameType = _typeof(_this3.fileFieldName);
+
+                /*判断是用什么方式作为formdata item 的 name*/
+                Object.keys(_this3.files).forEach(function (key) {
                     if (key == 'length') return;
-                    var file = _this3.files[key];
-                    formData.append(_this3.fileFieldName, file);
+
+                    if (fieldNameType == 'function') {
+                        var file = _this3.files[key];
+                        var fileFieldName = _this3.fileFieldName(file);
+                        formData.append(fileFieldName, file);
+                    } else if (fieldNameType == 'string') {
+                        var _file = _this3.files[key];
+                        formData.append(_this3.fileFieldName, _file);
+                    } else {
+                        var _file2 = _this3.files[key];
+                        formData.append(_file2.name, _file2);
+                    }
                 });
-            } else {
-                Object.keys(this.files).forEach(function (key) {
-                    if (key == 'length') return;
-                    var file = _this3.files[key];
-                    var fileFieldName = _this3.fileFieldName(file);
-                    formData.append(fileFieldName, file);
-                });
-            }
-            var fieldName = this.fileFieldName ? this.fileFieldName : 'name';
+
+                var fieldName = _this3.fileFieldName ? _this3.fileFieldName : 'name';
+            })();
         }
         /*组装自定义添加到FormData的对象*/
 
