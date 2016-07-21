@@ -1,8 +1,8 @@
 {
   "name": "react-fileupload",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "Upload files async with xhr2 or iframe for IE. Supporting IE8+. Doing well in Tencent.",
-  "main": "dist/main.js",
+  "main": "dist/main.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

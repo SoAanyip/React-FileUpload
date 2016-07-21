@@ -78,6 +78,8 @@ accept | string | ``''`` | Limit the type (extension) of file.
 multiple | boolean | ``false`` | Allow multi-upload or not. Not supporting IE9-.
 numberLimit | number/func | false | Limit how much file that user can choose in multi-upload case.User can still choose but FileUpload will filter.
 fileFieldName | string/func | false | When a file is added to formData, defaulting file name as key. When is a string, use it. And When is a func, use return value. Func will receive the File object as argument.
+withCredentials | boolean | false | Same as `xhr.withCredentials`.
+requestHeaders | object | false | Key-values that will be set using  `xhr.setRequestHeader(key, value)`.
 
 ### Life circle functions ###
 Also set as the properties of options.
@@ -357,8 +359,8 @@ accept | string | ``''`` | 限制选择文件的类型（后缀）
 multiple | boolean | ``false`` | 是否允许同时选择多文件）不支持IE9-
 numberLimit | number/func | false | 多文件上传时限制用户选择的数量（用户仍可以选择，但是会在选择后进行过滤）
 fileFieldName | string/func | false | 文件添加到formData时，默认用file.name作为key。传入string会直接使用此string作为key，若为func则取返回值，func的参数为对应的file对象。
-
-
+withCredentials | boolean | false | 与 `xhr.withCredentials` 一致。
+requestHeaders | object | false | 对象中的键值对会作为 `xhr.setRequestHeader(key, value)` 的参数。
 
 
 ### 生命周期函数 ###
@@ -581,6 +583,11 @@ render(){
 
 
 ## Change-log ##
+
+### 2.2.0 ###
+- Add property `withCredentials`.
+- Add property `requestHeaders`.
+- Add `main.min.js`, and `main` in `package.json` points at that file now.
 
 ### 2.1.2 ###
 - Fix #7, unexpected error on `fileFIeldName`.

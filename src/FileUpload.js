@@ -15,7 +15,7 @@ const emptyFunction = function() {}
 let currentIEID = 0
 /*存放当前IE上传组的可用情况*/
 const IEFormGroup = [true]
-const {PropTypes} = React
+const PT = React.PropTypes
 
 const FileUpload = React.createClass({
 
@@ -30,36 +30,38 @@ const FileUpload = React.createClass({
             
             return null
         },*/
-        options: PropTypes.shape({
+        options: PT.shape({
             /*basics*/
-            baseUrl: PropTypes.string.isRequired,
-            param: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
-            dataType: PropTypes.string,
-            chooseAndUpload: PropTypes.bool,
-            paramAddToField: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
-            wrapperDisplay: PropTypes.string,
-            timeout: PropTypes.number,
-            accept: PropTypes.string,
-            multiple: PropTypes.bool,
-            numberLimit: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
-            fileFieldName: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+            baseUrl: PT.string.isRequired,
+            param: PT.oneOfType([PT.object, PT.func]),
+            dataType: PT.string,
+            chooseAndUpload: PT.bool,
+            paramAddToField: PT.oneOfType([PT.object, PT.func]),
+            wrapperDisplay: PT.string,
+            timeout: PT.number,
+            accept: PT.string,
+            multiple: PT.bool,
+            numberLimit: PT.oneOfType([PT.number, PT.func]),
+            fileFieldName: PT.oneOfType([PT.string, PT.func]),
+            withCredentials: PT.bool,
+            requestHeaders: PT.object,
             /*specials*/
-            tag: PropTypes.string,
-            disabledIEChoose: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
-            _withoutFileUpload: PropTypes.bool,
-            filesToUpload: PropTypes.arrayOf(PropTypes.object),
+            tag: PT.string,
+            disabledIEChoose: PT.oneOfType([PT.bool, PT.func]),
+            _withoutFileUpload: PT.bool,
+            filesToUpload: PT.arrayOf(PT.object),
             /*funcs*/
-            beforeChoose: PropTypes.func,
-            chooseFile: PropTypes.func,
-            beforeUpload: PropTypes.func,
-            doUpload: PropTypes.func,
-            uploading: PropTypes.func,
-            uploadSuccess: PropTypes.func,
-            uploadError: PropTypes.func,
-            uploadFail: PropTypes.func
+            beforeChoose: PT.func,
+            chooseFile: PT.func,
+            beforeUpload: PT.func,
+            doUpload: PT.func,
+            uploading: PT.func,
+            uploadSuccess: PT.func,
+            uploadError: PT.func,
+            uploadFail: PT.func
         }).isRequired,
-        style: PropTypes.object,
-        className: PropTypes.string
+        style: PT.object,
+        className: PT.string
     },
 
     /*根据props更新组件*/
@@ -79,6 +81,8 @@ const FileUpload = React.createClass({
         this.multiple = options.multiple || false
         this.numberLimit = options.numberLimit || false //允许多文件上传时，选择文件数量的限制
         this.fileFieldName = options.fileFieldName || false //文件附加到formData上时的key，传入string指定一个file的属性名，值为其属性的值。不支持IE
+        this.withCredentials = options.withCredentials || false //跨域时是否使用认证信息
+        this.requestHeaders = options.requestHeaders || false //要设置的请求头键值对
 
         /*生命周期函数*/
         /**
@@ -428,6 +432,15 @@ const FileUpload = React.createClass({
         /*AJAX上传部分*/
         const xhr = new XMLHttpRequest()
         xhr.open('POST', targeturl, true)
+
+        /*跨域是否开启验证信息*/
+        xhr.withCredentials = this.withCredentials
+        /*是否需要设置请求头*/
+        const rh = this.requestHeaders
+        rh && Object.keys(rh).forEach(key =>
+            xhr.setRequestHeader(key, rh[key])
+        )
+
         //xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded charset=UTF-8')
 
         /*处理超时。用定时器判断超时，不然xhr state=4 catch的错误无法判断是超时*/
