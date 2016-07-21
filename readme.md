@@ -178,13 +178,15 @@ options:{
     },
     dataType : 'json',
     wrapperDisplay : 'inline-block',
-    multiple: 'true',
+    multiple: true,
     numberLimit: 9,
     accept: 'image/*',
     chooseAndUpload : false,
     paramAddToField : {purpose: 'save'},
     fileFieldName : 'file',
     //fileFieldName(file){ return file.name },
+    withCredentials: false,
+	requestHeaders: {'hi': 'how are you'},
     beforeChoose : function()[
         return user.isAllowUpload;
     },
@@ -459,13 +461,15 @@ options:{
     },
     dataType : 'json',
     wrapperDisplay : 'inline-block',
-    multiple: 'true',
+    multiple: true,
     numberLimit: 9,
     accept: 'image/*',
     chooseAndUpload : false,
     paramAddToField : {purpose: 'save'},
     fileFieldName : 'file',
     //fileFieldName(file){ return file.name },
+    withCredentials: false,
+	requestHeaders: {'hi': 'how are you'},
     beforeChoose : function()[
         return user.isAllowUpload;
     },
