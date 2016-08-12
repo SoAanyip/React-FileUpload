@@ -23,11 +23,11 @@ const FileUpload = React.createClass({
     propTypes: {
         /*children(props) {
             if(!props.children) return null
-            
+
             const children =  Array.isArray(props.children) ? props.children : [props.children]
-            if( children.some(prop=>prop === undefined || prop === null) ) 
+            if( children.some(prop=>prop === undefined || prop === null) )
                 return new Error('Children should not be null, undefined or something like this. Check the children that you passed inside <FileUpload>.')
-            
+
             return null
         },*/
         options: PT.shape({
@@ -50,6 +50,7 @@ const FileUpload = React.createClass({
             disabledIEChoose: PT.oneOfType([PT.bool, PT.func]),
             _withoutFileUpload: PT.bool,
             filesToUpload: PT.arrayOf(PT.object),
+            textBeforeFiles: PT.bool,
             /*funcs*/
             beforeChoose: PT.func,
             chooseFile: PT.func,
@@ -148,7 +149,7 @@ const FileUpload = React.createClass({
 
         this._withoutFileUpload = options._withoutFileUpload || false      //不带文件上传，为了给秒传功能使用，不影响IE
         this.filesToUpload = options.filesToUpload || []       //使用filesToUpload()方法代替
-
+        this.textBeforeFiles = options.textBeforeFiles || false //make this true to add text fields before file data
         /*使用filesToUpload()方法代替*/
         if (this.filesToUpload.length && !this.isIE) {
             this.filesToUpload.forEach( file => {
@@ -359,6 +360,15 @@ const FileUpload = React.createClass({
         }
         return dataType == 'json' ? resp.json : resp.responseText
     },
+    appendFieldsToFormData(formData){
+      /*组装自定义添加到FormData的对象*/
+
+      const field = typeof this.paramAddToField == 'function' ? this.paramAddToField() : this.paramAddToField
+      field &&
+          Object.keys(field).map(index=>
+            formData.append(index, field[index])
+          )
+    },
     /*执行上传*/
     commonUpload() {
         /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
@@ -379,6 +389,10 @@ const FileUpload = React.createClass({
         const scope = {}
         /*组装FormData*/
         const formData = new FormData()
+        /*If we need to add fields before file data append here*/
+        if(this.textBeforeFiles){
+           this.appendFieldsToFormData(formData);
+        }
         if (!this._withoutFileUpload) {
             const fieldNameType = typeof this.fileFieldName
 
@@ -400,16 +414,12 @@ const FileUpload = React.createClass({
             })
 
             const fieldName = this.fileFieldName ? this.fileFieldName : 'name'
-            
+
         }
-        /*组装自定义添加到FormData的对象*/
-
-        const field = typeof this.paramAddToField == 'function' ? this.paramAddToField() : this.paramAddToField
-        field &&
-            Object.keys(field).map(index=>
-              formData.append(index, field[index])
-            )
-
+        /*If we need to add fields after file data append here*/
+        if(!this.textBeforeFiles){
+          this.appendFieldsToFormData(formData);
+        }
         const baseUrl = this.baseUrl
 
         /*url参数*/
