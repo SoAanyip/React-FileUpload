@@ -12,7 +12,7 @@
   * [options](#options) 
   * [Life Circle Functions](#life-circle-functions)
   * [Special Properties](#special-properties)
-  * [Component Functions](#Component-functions)
+  * [Component Functions](#component-functions)
 * [Examples](#examples)
 * [Change-log](#change-log)
 * [License](#license)
@@ -242,6 +242,10 @@ Do the same as clicking `chooseBtn` . Only support modern browsers.
 
 ## examples ##
 
+If you have better and clearer demos, plz tell me! Online or offline.
+
+simple example:
+
 ```
 const FileUpload = require('react-fileupload');
 ...
@@ -316,7 +320,7 @@ options:{
 }
 ```
 
-An running example:
+An working example:
 
 ```
 this.uploadOptions = {
