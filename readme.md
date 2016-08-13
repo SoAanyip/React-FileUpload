@@ -6,19 +6,30 @@
 
 
 ### EN ###
-*	[Introduce](#introduce)
-*   [Download](#download)
-*	[API](#api-en)
-*	[License](#license)
-*	[Change-log](#change-log)
+* [Introduce](#introduce)
+* [Download](#download)
+* [API](#api-en)
+  * [options](#options) 
+  * [Life Circle Functions](#Life Circle Functions)
+  * [Special Properties](#Special Properties)
+  * [Component Functions](#Component Functions)
+* [Examples](#examples)
+* [Change-log](#change-log)
+* [License](#license)
 
 ### CN ###
 
-*	[简介](#简介)
-*   [下载](#下载)
-*	[API](#api-cn)
-*	[License](#license)
-*	[Change-log](#change-log)
+* [简介](#简介)
+* [下载](#下载)
+* [API](#api-cn)
+  * [options](#options) 
+  * [生命周期函数](#生命周期函数)
+  * [特殊属性](#特殊属性)
+  * [组件方法](#组件方法)
+* [例子](#例子)
+* [Change-log](#change-log)
+* [License](#license)
+
 
 ## Introduce ##
 1. A React component of async file uploading, using File API+FormData in modern browser, and form+iframe in IE9-. If want to use in IE8, use es5-shim or so.
@@ -167,69 +178,6 @@ Use filesToUpload(files) of component functions instead.
 IF there is file(File instance) that need to be uploaded immediately, it can be pushed in this array, and should be cleared in `beforeUpload` or `doUpload`. Not supporting IE. This file will be detected in `componentWillReceiveProps` and uploaded.
 
 
-
-### example ###
-```
-options:{
-    baseUrl : './upload',
-    param : {
-        name:'123',
-        category: '1'
-    },
-    dataType : 'json',
-    wrapperDisplay : 'inline-block',
-    multiple: true,
-    numberLimit: 9,
-    accept: 'image/*',
-    chooseAndUpload : false,
-    paramAddToField : {purpose: 'save'},
-    fileFieldName : 'file',
-    //fileFieldName(file){ return file.name },
-    withCredentials: false,
-	requestHeaders: {'hi': 'how are you'},
-    beforeChoose : function()[
-        return user.isAllowUpload;
-    },
-    chooseFile : function(files){
-        console.log('you choose',typeof files == 'string' ? files : files[0].name);
-    },
-    beforeUpload : function(files,mill){
-        if(typeof files == string) return true;
-        if(files[0].size<1024*1024*20){
-            files[0].mill = mill;
-            return true;
-        }
-        return false;
-    },
-    doUpload : function(files,mill){
-        var isFile = !(typeof files == 'string');
-        var name = isFile? files[0].name : files;
-        var tmpFile = {
-            name:name,
-            mill: isFile? files[0].mill : mill
-        }
-        /*存入暂存空间*/
-        tempSave.push(tmpFile);
-        console.log('uploading',name);
-    },
-    uploading : function(progress){
-        console.log('loading...',progress.loaded/progress.total+'%');
-    },
-    uploadSuccess : function(resp){
-        /*Find the file with mill, and delete the tmpFile.*/
-        popTmpSave(resp.mill);
-        console.log('upload success',resp.data);
-    },
-    uploadError : function(err){
-        alert(err.message);
-    },
-    uploadFail : function(resp){
-        alert(resp);
-    },
-}
-```
-
-
 ### children ###
 
 You can just set two btns.
@@ -244,17 +192,6 @@ Or if you set the `chooseAndUpload` to true, you need to set only one with `ref=
 ```
 <FileUpload options={options}>
     <button ref="chooseAndUpload">chooseAndUpload</button>
-</FileUpload>
-```
-
-Ofcourse btn is not necessary.
-```
-<FileUpload options={options}>
-    <div ref="chooseBtn">
-        <i className="icon icon-upload" />
-        <span>do it</span>
-    </div>
-    <button ref="uploadBtn">upload<button>
 </FileUpload>
 ```
 
@@ -302,6 +239,208 @@ Do the same as clicking `chooseBtn` . Only support modern browsers.
 @param null
 
 @return null
+
+## examples ##
+
+```
+const FileUpload = require('react-fileupload');
+...
+render(){
+	/*set properties*/
+	const options={
+		baseUrl:'http://127.0.0.1',
+		param:{
+			fid:0
+		}
+	}
+	/*Use FileUpload with options*/
+	/*Set two dom with ref*/
+	return (
+		<FileUpload options={options}>
+			<button ref="chooseBtn">choose</button>
+			<button ref="uploadBtn">upload</button>
+		</FileUpload>
+	)	        
+}
+```
+
+Most of the options may be set like:
+
+```
+options:{
+    baseUrl : './upload',
+    param : {
+        category: '1',
+        _: Date().getTime()
+    },
+    dataType : 'json',
+    wrapperDisplay : 'inline-block',
+    multiple: true,
+    numberLimit: 9,
+    accept: 'image/*',
+    chooseAndUpload : false,
+    paramAddToField : {purpose: 'save'},
+    //fileFieldName : 'file',
+    fileFieldName(file){ return file.name },
+    withCredentials: false,
+	requestHeaders: {'User-Agent': 'So Aanyip'},
+    beforeChoose : function()[
+        return user.isAllowUpload
+    },
+    chooseFile : function(files){
+        console.log('you choose',typeof files == 'string' ? files : files[0].name)
+    },
+    beforeUpload : function(files,mill){
+        if(typeof files == string) return true
+        if(files[0].size<1024*1024*20){
+            files[0].mill = mill
+            return true
+        }
+        return false
+    },
+    doUpload : function(files,mill){
+        console.log('you just uploaded',typeof files == 'string' ? files : files[0].name)
+    },
+    uploading : function(progress){
+        console.log('loading...',progress.loaded/progress.total+'%')
+    },
+    uploadSuccess : function(resp){
+        console.log('upload success..!')
+    },
+    uploadError : function(err){
+        alert(err.message)
+    },
+    uploadFail : function(resp){
+        alert(resp)
+    }
+}
+```
+
+An running example:
+
+```
+this.uploadOptions = {
+  baseUrl: '/node/api',
+  param: {
+    _c: 'file',
+    _a: 'UploadFile'
+  },
+  multiple: true,
+  numberLimit: this._getLimitNumber,
+  accept: 'image/*',
+  fileFieldName(file) {
+    return file.rawID
+  },
+  chooseAndUpload: true,
+  wrapperDisplay: 'block',
+  beforeUpload: this._checkUploadImg,
+  uploading: this._handleUploading,
+  /*xhr success*/
+  uploadSuccess: this._handleUploadSuccess,
+  /*xhr fail*/
+  uploadFail: this._handleUploadFailed,
+  uploadError: this._handleUploadFailed
+}
+
+/*Litmit how much files could be uploaded*/
+@autobind
+_getLimitNumber() {
+  const IMAGE_LIMIT = this.props.imageLimit  //e.g. 9
+  const stateRawID = this.props.formState.rawIDs,
+    rawIDs = stateRawID && stateRawID.value ? JSON.parse(stateRawID.value) : []  //How much imgs chosed.
+
+  return rawIDs.length >= IMAGE_LIMIT ? 0 : IMAGE_LIMIT - rawIDs.length
+}
+
+/*determine whether the files could be sent or not*/
+@autobind
+_checkUploadImg(files, mill) {
+  const { formState } = this.props,
+    formRawIDs = formState.rawIDs && formState.rawIDs.value ? JSON.parse(formState.rawIDs.value) : [],
+    attachment = {},
+    errorMsg = {
+      size:{
+        desc: 'Size lagger than 20Mb is not supported',
+        names: []
+      },
+      ext:{
+        desc: 'Not supported extention',
+        names: []
+      }
+    }
+  let canUpload = true
+
+  Object.keys(files).forEach(key => {
+    /*Some browsers may find 'length' as key.*/
+    if(key === 'length') return
+    const file = files[key],
+      dataUrl = window.URL.createObjectURL(file),
+      /*rawID: The way I use like md5*/
+      rawID = this._addRawID(file),
+      { name, size, lastModified } = file
+
+    /*size > 20Mb or not*/
+    if( size > (20 * 1024 * 1024) ) return errorMsg.size.names.push(name)
+    /*Check extention*/
+    if(!isImg(name)) return errorMsg.ext.names.push(name)
+
+    /*Whether img already in FormData*/
+    formRawIDs.includes(rawID) ?
+      message.info(`You had already chosed ${name}`,2500) :
+      attachment[rawID] = {
+        name,
+        size,
+        lastModified,
+        rawID,
+        dataUrl,
+        mill
+      }
+  })
+
+  const rawIDs = Object.keys(attachment)
+
+  !rawIDs.length && ( canUpload = false )
+
+  const msgStr = this._packErrorMessage(errorMsg)
+  msgStr.length && message.error(msgStr)
+
+  !Object.keys(attachment).length && (canUpload = false)
+
+  /*Do xhr or not*/
+  return canUpload
+}
+
+/*Progress*/
+@autobind
+_handleUploading(progress, mill) {
+  this.props.dispatch(
+    this.props.uploadProgress( {progress,mill} )
+  )
+}
+
+
+@autobind
+_handleUploadSuccess(respArr) {
+ //depends on your response
+}
+
+@autobind
+_handleUploadFailed(err) {
+  typeof err !== 'string' && (err = err.msg)
+  if(err == 'undefined' || err == undefined) err = 'Unknown error'
+  message.error(`Upload failed，${err}`)
+}
+
+render() {
+  return (
+    <FileUpload options={this.uploadOptions} ref="fileUpload">
+      <div styleName={dashedBoxStyle} ref="chooseAndUpload">
+        {plusIcon}
+      </div>
+    </FileUpload>
+  )
+}
+```
 
 
 ## 简介 ##
@@ -451,68 +590,6 @@ IE情况下，由于上传按钮被隐藏的input覆盖，不能进行disabled�
 如有要立即上传的文件(File对象)，放入这个数组，然后在beforeUpload或者doUpload外部清除传入file，不支持IE。传入的文件会在componentWillReceiveProps检测到并立刻上传。
 
 
-### 示例 ###
-```
-options:{
-    baseUrl : './upload',
-    param : {
-        name:'123',
-        category: '1'
-    },
-    dataType : 'json',
-    wrapperDisplay : 'inline-block',
-    multiple: true,
-    numberLimit: 9,
-    accept: 'image/*',
-    chooseAndUpload : false,
-    paramAddToField : {purpose: 'save'},
-    fileFieldName : 'file',
-    //fileFieldName(file){ return file.name },
-    withCredentials: false,
-	requestHeaders: {'hi': 'how are you'},
-    beforeChoose : function()[
-        return user.isAllowUpload;
-    },
-    chooseFile : function(files){
-        console.log('you choose',typeof files == 'string' ? files : files[0].name);
-    },
-    beforeUpload : function(files,mill){
-        if(typeof files == string) return true;
-        if(files[0].size<1024*1024*20){
-            files[0].mill = mill;
-            return true;
-        }
-        return false;
-    },
-    doUpload : function(files,mill){
-        var isFile = !(typeof files == 'string');
-        var name = isFile? files[0].name : files;
-        var tmpFile = {
-            name:name,
-            mill: isFile? files[0].mill : mill
-        }
-        /*存入暂存空间*/
-        tempSave.push(tmpFile);
-        console.log('uploading',name);
-    },
-    uploading : function(progress){
-        console.log('loading...',progress.loaded/progress.total+'%');
-    },
-    uploadSuccess : function(resp){
-        /*通过mill找到对应的文件，删除对应tmpFile*/
-        popTmpSave(resp.mill);
-        console.log('upload success',resp.data);
-    },
-    uploadError : function(err){
-        alert(err.message);
-    },
-    uploadFail : function(resp){
-        alert(resp);
-    },
-}
-```
-
-
 ### children ###
 
 可以传入两个btn
@@ -585,6 +662,209 @@ render(){
 
 @return null
 
+## 例子 ##
+
+简单使用方式：
+```
+var FileUpload = require('react-fileupload');
+...
+render(){
+	/*指定参数*/
+	var options={
+		baseUrl:'http://127.0.0.1',
+		param:{
+			fid:0
+		}
+	}
+	/*调用FileUpload,传入options。然后在children中*/
+	/*传入两个dom(不一定是button)并设置其ref值。*/
+	return (
+		<FileUpload options={options}>
+			<button ref="chooseBtn">choose</button>
+			<button ref="uploadBtn">upload<button>
+		</FileUpload>
+	)	        
+}
+```
+
+多数options的设置方式
+
+```
+options:{
+    baseUrl : './upload',
+    param : {
+        category: '1',
+        _: Date().getTime()
+    },
+    dataType : 'json',
+    wrapperDisplay : 'inline-block',
+    multiple: true,
+    numberLimit: 9,
+    accept: 'image/*',
+    chooseAndUpload : false,
+    paramAddToField : {purpose: 'save'},
+    //fileFieldName : 'file',
+    fileFieldName(file){ return file.name },
+    withCredentials: false,
+	requestHeaders: {'User-Agent': 'So Aanyip'},
+    beforeChoose : function()[
+        return user.isAllowUpload
+    },
+    chooseFile : function(files){
+        console.log('you choose',typeof files == 'string' ? files : files[0].name)
+    },
+    beforeUpload : function(files,mill){
+        if(typeof files == string) return true
+        if(files[0].size<1024*1024*20){
+            files[0].mill = mill
+            return true
+        }
+        return false
+    },
+    doUpload : function(files,mill){
+        console.log('you just uploaded',typeof files == 'string' ? files : files[0].name)
+    },
+    uploading : function(progress){
+        console.log('loading...',progress.loaded/progress.total+'%')
+    },
+    uploadSuccess : function(resp){
+        console.log('upload success..!')
+    },
+    uploadError : function(err){
+        alert(err.message)
+    },
+    uploadFail : function(resp){
+        alert(resp)
+    }
+}
+```
+
+一个实际应用的例子：
+
+```
+this.uploadOptions = {
+  baseUrl: '/node/api',
+  param: {
+    _c: 'file',
+    _a: 'UploadFile'
+  },
+  multiple: true,
+  numberLimit: this._getLimitNumber,
+  accept: 'image/*',
+  fileFieldName(file) {
+    return file.rawID
+  },
+  chooseAndUpload: true,
+  wrapperDisplay: 'block',
+  beforeUpload: this._checkUploadImg,
+  uploading: this._handleUploading,
+  /*上传成功*/
+  uploadSuccess: this._handleUploadSuccess,
+  /*xhr失败*/
+  uploadFail: this._handleUploadFailed,
+  uploadError: this._handleUploadFailed
+}
+
+/*限制这次上传的文件数,超过的数量会在FileUpload直接被遗弃*/
+@autobind
+_getLimitNumber() {
+  const IMAGE_LIMIT = this.props.imageLimit  //e.g. 9
+  const stateRawID = this.props.formState.rawIDs,
+    rawIDs = stateRawID && stateRawID.value ? JSON.parse(stateRawID.value) : []  //How much imgs chosed.
+
+  return rawIDs.length >= IMAGE_LIMIT ? 0 : IMAGE_LIMIT - rawIDs.length
+}
+
+/*上传前的信息保存的验证*/
+@autobind
+_checkUploadImg(files, mill) {
+  const { formState } = this.props,
+    formRawIDs = formState.rawIDs && formState.rawIDs.value ? JSON.parse(formState.rawIDs.value) : [],
+    attachment = {},
+    errorMsg = {
+      size:{
+        desc: '暂不支持上传超过20Mb的附件',
+        names: []
+      },
+      ext:{
+        desc: '不支持的文件后缀',
+        names: []
+      }
+    }
+  let canUpload = true
+
+  Object.keys(files).forEach(key => {
+    /*部分浏览器会keys到length属性。如果要彻底避免需要用for*/
+    if(key === 'length') return
+    const file = files[key],
+      dataUrl = window.URL.createObjectURL(file),
+      rawID = this._addRawID(file),
+      { name, size, lastModified } = file
+
+    /*检查文件大小是否超过20M*/
+    if( size > (20 * 1024 * 1024) ) return errorMsg.size.names.push(name)
+    /*检查文件后缀*/
+    if(!isImg(name)) return errorMsg.ext.names.push(name)
+
+    /*检查formState中是否已有此图片*/
+    formRawIDs.includes(rawID) ?
+      message.info(`您已经选择过${name}`,2500) :
+      /*不保存整个真实文件。仅保存文件属性*/
+      attachment[rawID] = {
+        name,
+        size,
+        lastModified,
+        rawID,
+        dataUrl,
+        mill
+      }
+  })
+
+  /*本次选择文件的rawIDs数组*/
+  const rawIDs = Object.keys(attachment)
+
+  !rawIDs.length && ( canUpload = false )
+
+  const msgStr = this._packErrorMessage(errorMsg)
+  msgStr.length && message.error(msgStr)
+
+  !Object.keys(attachment).length && (canUpload = false)
+
+  /*满足上传返回true进行上传，否则为false*/
+  return canUpload
+}
+
+/*上传中的进度条*/
+@autobind
+_handleUploading(progress, mill) {
+  this.props.dispatch(
+    this.props.uploadProgress( {progress,mill} )
+  )
+}
+
+
+@autobind
+_handleUploadSuccess(respArr) {
+ //depends on your response
+}
+
+@autobind
+_handleUploadFailed(err) {
+  typeof err !== 'string' && (err = err.msg)
+  if(err == 'undefined' || err == undefined) err = '未知错误'
+  message.error(`上传失败，${err}`)
+}
+
+render() {
+  return (
+    <FileUpload options={this.uploadOptions} ref="fileUpload">
+      <div styleName={dashedBoxStyle} ref="chooseAndUpload">
+        {plusIcon}
+      </div>
+    </FileUpload>
+  )
+}
+```
 
 ## Change-log ##
 
