@@ -13,7 +13,9 @@
   * [Life Circle Functions](#life-circle-functions)
   * [Special Properties](#special-properties)
   * [Component Functions](#component-functions)
+  * [Children](#children)
 * [Examples](#examples)
+* [Contributor](#contributor)
 * [Change-log](#change-log)
 * [License](#license)
 
@@ -26,7 +28,9 @@
   * [生命周期函数](#生命周期函数)
   * [特殊属性](#特殊属性)
   * [组件方法](#组件方法)
+  * [Children](#children)
 * [例子](#例子)
+* [Contributor](#contributor)
 * [Change-log](#change-log)
 * [License](#license)
 
@@ -118,14 +122,23 @@ Triggered before uploading. return true to continue or false to stop uploading.
 
 @return  {boolean} Allow the upload action or not.
 
-#### doUpload(files,mill) ####
+#### doUpload(files,mill,xhrID) ####
 Triggered after the request is sent(xhr send | form submit).
 
 @param files {array[File] | string} In moderns it will be the array contains the File instance(the way that File API returns). In IE9- it will be the full name of file.
 
 @param mill {long} The time of the upload action (millisecond). If the File instance has the `mill` property it will be the same as it.
 
+@param xhrID {int} ID of this uploading xhr. Could be useful for `abort`.
+
 @return
+
+#### onabort(mill,id) ####
+Triggered after you aborting a xhr.
+
+@param mill {long} The time of the upload action (millisecond) that you aborted.
+
+@param xhrID {int} The ID of the xhr taht you aborted.
 
 #### uploading(progress) ####
 It will be triggered continuously when the file is uploading in moderns.
@@ -155,6 +168,11 @@ Callback when upload failed (according to the AJAX simply).
 
 ### Special properties ###
 Also can be set as property of `options`, but is not in common use.
+
+#### textBeforeFiles ####
+{boolean}
+
+make this true to add text fields before file data.
 
 #### tag ####
 {string}
@@ -239,6 +257,11 @@ Do the same as clicking `chooseBtn` . Only support modern browsers.
 @param null
 
 @return null
+
+#### abort ####
+Abort a xhr. Temporarily only works in modern browsers.
+
+@param xhrID {int} If not passing an ID, will abort the newest one. You can get the ID of a xhr in `doUpload()`. 
 
 ## examples ##
 
@@ -534,14 +557,23 @@ requestHeaders | object | false | 对象中的键值对会作为 `xhr.setRequest
 
 @return  {boolean} 是否允许用户进行上传
 
-#### doUpload(files,mill) ####
+#### doUpload(files,mill,xhrID) ####
 上传动作(xhr send | form submit)执行后(请求发送后)调用
 
 @param file {array[File] | string} 现代浏览器返回包含File对象的数组(File API返回的方式)，IE返回文件名
 
 @param mill {long} 上传动作执行时的时间(毫秒)，如果File对象已有mill属性则返回一样的
 
+@param xhrID {int} 这次上传所属的xhr的id。在 `abort` 的组件方法中会用到。
+
 @return
+
+#### onabort(mill,id) ####
+在你主动取消一个xhr后触发。
+
+@param mill {long} 你所取消的上传动作执行时的时间(毫秒)
+
+@param xhrID {int} 你所取消的xhr所属id。
 
 #### uploading(progress) ####
 在文件上传中的时候，浏览器会不断触发此函数，IE9-为虚拟的进度
@@ -571,6 +603,11 @@ requestHeaders | object | false | 对象中的键值对会作为 `xhr.setRequest
 
 ### 特殊属性 ###
 以下也可以作为options的属性传入，但一般不使用到
+
+#### textBeforeFiles ####
+{boolean}
+
+当属性为 `true` 时让 `paramAddToField` 的参数添加在文件之前。
 
 #### tag ####
 {string}
@@ -665,6 +702,11 @@ render(){
 @param null
 
 @return null
+
+#### abort ####
+主动取消一个xhr。暂时只在现代浏览器起作用。
+
+@param xhrID {int} 这里如果不传入id，就会取消最新的一个xhr。 在  `doUpload()` 函数的参数中可以得到xhrID。
 
 ## 例子 ##
 
@@ -870,7 +912,16 @@ render() {
 }
 ```
 
+## Contributor ##
+- [@Pritoj](https://github.com/Pritoj)
+
 ## Change-log ##
+
+### 2.3.0 ###
+- Add special property `textBeforeFiles`, thanks [@Pritoj](https://github.com/Pritoj).
+- Add component function `abort`
+- Update function `doUpload(files, mill, xhrID)`
+- Add life circle function `onabort`
 
 ### 2.2.0 ###
 - Add property `withCredentials`.

@@ -15,21 +15,16 @@ const emptyFunction = function() {}
 let currentIEID = 0
 /*存放当前IE上传组的可用情况*/
 const IEFormGroup = [true]
+/*当前xhr的数组（仅有已开始上传之后的xhr）*/
+let xhrList = []
+let currentXHRID = 0
+
 const PT = React.PropTypes
 
 const FileUpload = React.createClass({
 
     /*类型验证*/
     propTypes: {
-        /*children(props) {
-            if(!props.children) return null
-
-            const children =  Array.isArray(props.children) ? props.children : [props.children]
-            if( children.some(prop=>prop === undefined || prop === null) )
-                return new Error('Children should not be null, undefined or something like this. Check the children that you passed inside <FileUpload>.')
-
-            return null
-        },*/
         options: PT.shape({
             /*basics*/
             baseUrl: PT.string.isRequired,
@@ -59,7 +54,8 @@ const FileUpload = React.createClass({
             uploading: PT.func,
             uploadSuccess: PT.func,
             uploadError: PT.func,
-            uploadFail: PT.func
+            uploadFail: PT.func,
+            onabort: PT.func
         }).isRequired,
         style: PT.object,
         className: PT.string
@@ -138,6 +134,12 @@ const FileUpload = React.createClass({
          * @param resp {string} 失败信息
          */
         this.uploadFail = options.uploadFail || emptyFunction
+        /**
+         * onabort(mill, xhrID) : 主动取消xhr进程的响应
+         * @param mill {long} 毫秒数，本次上传时刻的时间
+         * @param xhrID {int} 在doUpload时会返回的当次xhr代表ID
+         */
+        this.onabort = options.onabort || emptyFunction
 
         this.files = options.files || this.files || false        //保存需要上传的文件
         /*特殊内容*/
@@ -192,33 +194,6 @@ const FileUpload = React.createClass({
         })
     },
 
-    /*外部调用方法，主动触发选择文件（等同于调用btn.click()), 仅支持现代浏览器*/
-    forwardChoose() {
-        if(this.isIE) return false
-        this.commonChooseFile()
-    },
-
-    /**
-     * 外部调用方法，当多文件上传时，用这个方法主动删除列表中某个文件
-     * @param func 用户调用时传入的函数，函数接收参数files（filesAPI 对象）
-     * @return Obj File API 对象
-     * File API Obj:
-     * {
-     *   0 : file,
-     *   1 : file,
-     *   length : 2
-     * }
-     */
-    fowardRemoveFile(func) {
-        this.files = func(this.files)
-    },
-
-    /*外部调用方法，传入files（File API）对象可以立刻执行上传动作，IE不支持。调用随后会触发beforeUpload*/
-    filesToUpload(files) {
-        if(this.isIE) return
-        this.files = files
-        this.commonUpload()
-    },
 
     /*触发隐藏的input框选择*/
     /*触发beforeChoose*/
@@ -246,6 +221,157 @@ const FileUpload = React.createClass({
         this.chooseFile(files)
         this.chooseAndUpload && this.commonUpload()
     },
+    
+    /*执行上传*/
+    commonUpload() {
+        /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
+        const mill = (this.files.length && this.files[0].mill) || (new Date).getTime()
+        const jud = this.beforeUpload(this.files, mill)
+        if (jud != true && jud != undefined && typeof jud != 'object') {
+            /*清除input的值*/
+            this.refs['ajax_upload_file_input'].value = ''
+            return
+        }
+
+
+
+        if (!this.files) return
+        if (!this.baseUrl) throw new Error('baseUrl missing in options')
+
+        /*用于存放当前作用域的东西*/
+        const scope = {}
+        /*组装FormData*/
+        let formData = new FormData()
+        /*If we need to add fields before file data append here*/
+        if(this.textBeforeFiles){
+           formData = this.appendFieldsToFormData(formData);
+        }
+        if (!this._withoutFileUpload) {
+            const fieldNameType = typeof this.fileFieldName
+
+            /*判断是用什么方式作为formdata item 的 name*/
+            Object.keys(this.files).forEach(key => {
+                if(key == 'length') return
+
+                if(fieldNameType == 'function') {
+                    const file = this.files[key]
+                    const fileFieldName = this.fileFieldName(file)
+                    formData.append(fileFieldName, file)
+                }else if(fieldNameType == 'string') {
+                    const file = this.files[key]
+                    formData.append(this.fileFieldName, file)
+                }else {
+                    const file = this.files[key]
+                    formData.append(file.name, file)
+                }
+            })
+
+        }
+        /*If we need to add fields after file data append here*/
+        if(!this.textBeforeFiles){
+          formData = this.appendFieldsToFormData(formData);
+        }
+        const baseUrl = this.baseUrl
+
+        /*url参数*/
+        /*如果param是一个函数*/
+        const param = typeof this.param === 'function' ? this.param(this.files) : this.param
+
+        let paramStr = ''
+
+        if (param) {
+            const paramArr = []
+            param['_'] = mill
+            Object.keys(param).forEach(key =>
+              paramArr.push(`${key}=${param[key]}`)
+            )
+            paramStr = '?' + paramArr.join('&')
+        }
+        const targeturl = baseUrl + paramStr
+
+        /*AJAX上传部分*/
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', targeturl, true)
+
+        /*跨域是否开启验证信息*/
+        xhr.withCredentials = this.withCredentials
+        /*是否需要设置请求头*/
+        const rh = this.requestHeaders
+        rh && Object.keys(rh).forEach(key =>
+            xhr.setRequestHeader(key, rh[key])
+        )
+
+        /*处理超时。用定时器判断超时，不然xhr state=4 catch的错误无法判断是超时*/
+        if(this.timeout) {
+            xhr.timeout = this.timeout
+            xhr.ontimeout = () => {
+                this.uploadError({type: 'TIMEOUTERROR', message: 'timeout'})
+                scope.isTimeout = false
+            }
+            scope.isTimeout = false
+            setTimeout(()=>{
+                scope.isTimeout = true
+            },this.timeout)
+        }
+
+        xhr.onreadystatechange = () => {
+            /*xhr finish*/
+            try {
+                if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 400) {
+                    const resp = this.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText
+                    this.uploadSuccess(resp)
+                } else if (xhr.readyState == 4) {
+                    /*xhr fail*/
+                    const resp = this.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText
+                    this.uploadFail(resp)
+                }
+            } catch (e) {
+                /*超时抛出不一样的错误，不在这里处理*/
+                !scope.isTimeout && this.uploadError({type: 'FINISHERROR', message: e.message})
+            }
+        }
+        /*xhr error*/
+        xhr.onerror = () => {
+            try {
+                const resp = this.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText
+                this.uploadError({type: 'XHRERROR', message: resp})
+            } catch (e) {
+                this.uploadError({type: 'XHRERROR', message: e.message})
+            }
+        }
+        /*这里部分浏览器实现不一致，而且IE没有这个方法*/
+        xhr.onprogress = xhr.upload.onprogress = progress => {
+            this.uploading(progress, mill)
+        }
+
+        /*不带文件上传，给秒传使用*/
+        this._withoutFileUpload ? xhr.send(null) : xhr.send(formData)
+
+        /*保存xhr id*/
+        xhrList.push(xhr)
+        const cID = xhrList.length - 1
+        currentXHRID = cID
+
+        /*有响应abort的情况*/
+        xhr.onabort = () => this.onabort(mill, cID)
+
+        /*trigger执行上传的用户回调*/
+        this.doUpload(this.files, mill, currentXHRID)
+
+        /*清除input的值*/
+        this.refs['ajax_upload_file_input'].value = ''
+    },
+
+    /*组装自定义添加到FormData的对象*/
+    appendFieldsToFormData(formData){
+        const field = typeof this.paramAddToField == 'function' ? this.paramAddToField() : this.paramAddToField
+        field &&
+            Object.keys(field).map(index=>
+                formData.append(index, field[index])
+            )
+        return formData
+    },
+
     /*iE选择前验证*/
     /*触发beforeChoose*/
     IEBeforeChoose(e) {
@@ -282,7 +408,7 @@ const FileUpload = React.createClass({
         if (param) {
             const paramArr = []
             param['_'] = mill
-            param['ie'] = 'true'
+            param['ie'] === undefined && (param['ie'] = 'true')
             for (const key in param) {
                 if(param[key] != undefined) paramArr.push(`${key}=${param[key]}`)
             }
@@ -360,150 +486,41 @@ const FileUpload = React.createClass({
         }
         return dataType == 'json' ? resp.json : resp.responseText
     },
-    appendFieldsToFormData(formData){
-      /*组装自定义添加到FormData的对象*/
 
-      const field = typeof this.paramAddToField == 'function' ? this.paramAddToField() : this.paramAddToField
-      field &&
-          Object.keys(field).map(index=>
-            formData.append(index, field[index])
-          )
+    /*外部调用方法，主动触发选择文件（等同于调用btn.click()), 仅支持现代浏览器*/
+    forwardChoose() {
+        if(this.isIE) return false
+        this.commonChooseFile()
     },
-    /*执行上传*/
-    commonUpload() {
-        /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
-        const mill = (this.files.length && this.files[0].mill) || (new Date).getTime()
-        const jud = this.beforeUpload(this.files, mill)
-        if (jud != true && jud != undefined && typeof jud != 'object') {
-            /*清除input的值*/
-            this.refs['ajax_upload_file_input'].value = ''
-            return
-        }
 
+    /**
+     * 外部调用方法，当多文件上传时，用这个方法主动删除列表中某个文件
+     * TODO: 此方法应为可以任意操作文件数组
+     * @param func 用户调用时传入的函数，函数接收参数files（filesAPI 对象）
+     * @return Obj File API 对象
+     * File API Obj:
+     * {
+     *   0 : file,
+     *   1 : file,
+     *   length : 2
+     * }
+     */
+    fowardRemoveFile(func) {
+        this.files = func(this.files)
+    },
 
+    /*外部调用方法，传入files（File API）对象可以立刻执行上传动作，IE不支持。调用随后会触发beforeUpload*/
+    filesToUpload(files) {
+        if(this.isIE) return
+        this.files = files
+        this.commonUpload()
+    },
 
-        if (!this.files) return
-        if (!this.baseUrl) throw new Error('baseUrl missing in options')
-
-        /*用于存放当前作用域的东西*/
-        const scope = {}
-        /*组装FormData*/
-        const formData = new FormData()
-        /*If we need to add fields before file data append here*/
-        if(this.textBeforeFiles){
-           this.appendFieldsToFormData(formData);
-        }
-        if (!this._withoutFileUpload) {
-            const fieldNameType = typeof this.fileFieldName
-
-            /*判断是用什么方式作为formdata item 的 name*/
-            Object.keys(this.files).forEach(key => {
-                if(key == 'length') return
-
-                if(fieldNameType == 'function') {
-                    const file = this.files[key]
-                    const fileFieldName = this.fileFieldName(file)
-                    formData.append(fileFieldName, file)
-                }else if(fieldNameType == 'string') {
-                    const file = this.files[key]
-                    formData.append(this.fileFieldName, file)
-                }else {
-                    const file = this.files[key]
-                    formData.append(file.name, file)
-                }
-            })
-
-            const fieldName = this.fileFieldName ? this.fileFieldName : 'name'
-
-        }
-        /*If we need to add fields after file data append here*/
-        if(!this.textBeforeFiles){
-          this.appendFieldsToFormData(formData);
-        }
-        const baseUrl = this.baseUrl
-
-        /*url参数*/
-        /*如果param是一个函数*/
-        const param = typeof this.param === 'function' ? this.param(this.files) : this.param
-
-        let paramStr = ''
-
-
-        if (param) {
-            const paramArr = []
-            param['_'] = mill
-            Object.keys(param).forEach(key =>
-              paramArr.push(`${key}=${param[key]}`)
-            )
-            paramStr = '?' + paramArr.join('&')
-        }
-        const targeturl = baseUrl + paramStr
-
-        /*AJAX上传部分*/
-        const xhr = new XMLHttpRequest()
-        xhr.open('POST', targeturl, true)
-
-        /*跨域是否开启验证信息*/
-        xhr.withCredentials = this.withCredentials
-        /*是否需要设置请求头*/
-        const rh = this.requestHeaders
-        rh && Object.keys(rh).forEach(key =>
-            xhr.setRequestHeader(key, rh[key])
-        )
-
-        //xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded charset=UTF-8')
-
-        /*处理超时。用定时器判断超时，不然xhr state=4 catch的错误无法判断是超时*/
-        if(this.timeout) {
-            xhr.timeout = this.timeout
-            xhr.ontimeout = () => {
-                this.uploadError({type: 'TIMEOUTERROR', message: 'timeout'})
-                scope.isTimeout = false
-            }
-            scope.isTimeout = false
-            setTimeout(()=>{
-                scope.isTimeout = true
-            },this.timeout)
-        }
-
-        xhr.onreadystatechange = () => {
-            /*xhr finish*/
-            try {
-                if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 400) {
-                    const resp = this.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText
-                    this.uploadSuccess(resp)
-                } else if (xhr.readyState == 4) {
-                    /*xhr fail*/
-                    const resp = this.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText
-                    this.uploadFail(resp)
-                }
-            } catch (e) {
-                /*超时抛出不一样的错误，不在这里处理*/
-                !scope.isTimeout && this.uploadError({type: 'FINISHERROR', message: e.message})
-            }
-        }
-        /*xhr error*/
-        xhr.onerror = () => {
-            try {
-                const resp = this.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText
-                this.uploadError({type: 'XHRERROR', message: resp})
-            } catch (e) {
-                this.uploadError({type: 'XHRERROR', message: e.message})
-            }
-        }
-        /*这里部分浏览器实现不一致，而且IE没有这个方法*/
-        xhr.onprogress = xhr.upload.onprogress = progress => {
-            this.uploading(progress, mill)
-        }
-
-        /*不带文件上传，给秒传使用*/
-        this._withoutFileUpload ? xhr.send(null) : xhr.send(formData)
-
-        /*trigger执行上传的用户回调*/
-        this.doUpload(this.files, mill)
-
-        /*清除input的值*/
-        this.refs['ajax_upload_file_input'].value = ''
+    /*外部调用方法，取消一个正在进行的xhr，传入id指定xhr（doupload时返回）或者默认取消最近一个。*/
+    abort(id) {
+        id === undefined ? 
+            xhrList[currentXHRID].abort() :
+            xhrList[id].abort()
     },
 
     /*判断ie版本*/

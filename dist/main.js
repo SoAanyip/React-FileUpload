@@ -1,4 +1,3 @@
-
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -22,6 +21,10 @@ var emptyFunction = function emptyFunction() {};
 var currentIEID = 0;
 /*存放当前IE上传组的可用情况*/
 var IEFormGroup = [true];
+/*当前xhr的数组（仅有已开始上传之后的xhr）*/
+var xhrList = [];
+var currentXHRID = 0;
+
 var PT = React.PropTypes;
 
 var FileUpload = React.createClass({
@@ -30,15 +33,6 @@ var FileUpload = React.createClass({
 
     /*类型验证*/
     propTypes: {
-        /*children(props) {
-            if(!props.children) return null
-            
-            const children =  Array.isArray(props.children) ? props.children : [props.children]
-            if( children.some(prop=>prop === undefined || prop === null) ) 
-                return new Error('Children should not be null, undefined or something like this. Check the children that you passed inside <FileUpload>.')
-            
-            return null
-        },*/
         options: PT.shape({
             /*basics*/
             baseUrl: PT.string.isRequired,
@@ -59,6 +53,7 @@ var FileUpload = React.createClass({
             disabledIEChoose: PT.oneOfType([PT.bool, PT.func]),
             _withoutFileUpload: PT.bool,
             filesToUpload: PT.arrayOf(PT.object),
+            textBeforeFiles: PT.bool,
             /*funcs*/
             beforeChoose: PT.func,
             chooseFile: PT.func,
@@ -67,7 +62,8 @@ var FileUpload = React.createClass({
             uploading: PT.func,
             uploadSuccess: PT.func,
             uploadError: PT.func,
-            uploadFail: PT.func
+            uploadFail: PT.func,
+            onabort: PT.func
         }).isRequired,
         style: PT.object,
         className: PT.string
@@ -148,6 +144,12 @@ var FileUpload = React.createClass({
          * @param resp {string} 失败信息
          */
         this.uploadFail = options.uploadFail || emptyFunction;
+        /**
+         * onabort(mill, xhrID) : 主动取消xhr进程的响应
+         * @param mill {long} 毫秒数，本次上传时刻的时间
+         * @param xhrID {int} 在doUpload时会返回的当次xhr代表ID
+         */
+        this.onabort = options.onabort || emptyFunction;
 
         this.files = options.files || this.files || false; //保存需要上传的文件
         /*特殊内容*/
@@ -159,7 +161,7 @@ var FileUpload = React.createClass({
 
         this._withoutFileUpload = options._withoutFileUpload || false; //不带文件上传，为了给秒传功能使用，不影响IE
         this.filesToUpload = options.filesToUpload || []; //使用filesToUpload()方法代替
-
+        this.textBeforeFiles = options.textBeforeFiles || false; //make this true to add text fields before file data
         /*使用filesToUpload()方法代替*/
         if (this.filesToUpload.length && !this.isIE) {
             this.filesToUpload.forEach(function (file) {
@@ -207,37 +209,6 @@ var FileUpload = React.createClass({
     },
 
 
-    /*外部调用方法，主动触发选择文件（等同于调用btn.click()), 仅支持现代浏览器*/
-    forwardChoose: function forwardChoose() {
-        if (this.isIE) return false;
-        this.commonChooseFile();
-    },
-
-
-    /**
-     * 外部调用方法，当多文件上传时，用这个方法主动删除列表中某个文件
-     * @param func 用户调用时传入的函数，函数接收参数files（filesAPI 对象）
-     * @return Obj File API 对象
-     * File API Obj:
-     * {
-     *   0 : file,
-     *   1 : file,
-     *   length : 2
-     * }
-     */
-    fowardRemoveFile: function fowardRemoveFile(func) {
-        this.files = func(this.files);
-    },
-
-
-    /*外部调用方法，传入files（File API）对象可以立刻执行上传动作，IE不支持。调用随后会触发beforeUpload*/
-    filesToUpload: function filesToUpload(files) {
-        if (this.isIE) return;
-        this.files = files;
-        this.commonUpload();
-    },
-
-
     /*触发隐藏的input框选择*/
     /*触发beforeChoose*/
     commonChooseFile: function commonChooseFile() {
@@ -266,6 +237,163 @@ var FileUpload = React.createClass({
         this.chooseAndUpload && this.commonUpload();
     },
 
+
+    /*执行上传*/
+    commonUpload: function commonUpload() {
+        var _this2 = this;
+
+        /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
+        var mill = this.files.length && this.files[0].mill || new Date().getTime();
+        var jud = this.beforeUpload(this.files, mill);
+        if (jud != true && jud != undefined && (typeof jud === 'undefined' ? 'undefined' : _typeof(jud)) != 'object') {
+            /*清除input的值*/
+            this.refs['ajax_upload_file_input'].value = '';
+            return;
+        }
+
+        if (!this.files) return;
+        if (!this.baseUrl) throw new Error('baseUrl missing in options');
+
+        /*用于存放当前作用域的东西*/
+        var scope = {};
+        /*组装FormData*/
+        var formData = new FormData();
+        /*If we need to add fields before file data append here*/
+        if (this.textBeforeFiles) {
+            formData = this.appendFieldsToFormData(formData);
+        }
+        if (!this._withoutFileUpload) {
+            (function () {
+                var fieldNameType = _typeof(_this2.fileFieldName);
+
+                /*判断是用什么方式作为formdata item 的 name*/
+                Object.keys(_this2.files).forEach(function (key) {
+                    if (key == 'length') return;
+
+                    if (fieldNameType == 'function') {
+                        var file = _this2.files[key];
+                        var fileFieldName = _this2.fileFieldName(file);
+                        formData.append(fileFieldName, file);
+                    } else if (fieldNameType == 'string') {
+                        var _file = _this2.files[key];
+                        formData.append(_this2.fileFieldName, _file);
+                    } else {
+                        var _file2 = _this2.files[key];
+                        formData.append(_file2.name, _file2);
+                    }
+                });
+            })();
+        }
+        /*If we need to add fields after file data append here*/
+        if (!this.textBeforeFiles) {
+            formData = this.appendFieldsToFormData(formData);
+        }
+        var baseUrl = this.baseUrl;
+
+        /*url参数*/
+        /*如果param是一个函数*/
+        var param = typeof this.param === 'function' ? this.param(this.files) : this.param;
+
+        var paramStr = '';
+
+        if (param) {
+            (function () {
+                var paramArr = [];
+                param['_'] = mill;
+                Object.keys(param).forEach(function (key) {
+                    return paramArr.push(key + '=' + param[key]);
+                });
+                paramStr = '?' + paramArr.join('&');
+            })();
+        }
+        var targeturl = baseUrl + paramStr;
+
+        /*AJAX上传部分*/
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', targeturl, true);
+
+        /*跨域是否开启验证信息*/
+        xhr.withCredentials = this.withCredentials;
+        /*是否需要设置请求头*/
+        var rh = this.requestHeaders;
+        rh && Object.keys(rh).forEach(function (key) {
+            return xhr.setRequestHeader(key, rh[key]);
+        });
+
+        /*处理超时。用定时器判断超时，不然xhr state=4 catch的错误无法判断是超时*/
+        if (this.timeout) {
+            xhr.timeout = this.timeout;
+            xhr.ontimeout = function () {
+                _this2.uploadError({ type: 'TIMEOUTERROR', message: 'timeout' });
+                scope.isTimeout = false;
+            };
+            scope.isTimeout = false;
+            setTimeout(function () {
+                scope.isTimeout = true;
+            }, this.timeout);
+        }
+
+        xhr.onreadystatechange = function () {
+            /*xhr finish*/
+            try {
+                if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 400) {
+                    var resp = _this2.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
+                    _this2.uploadSuccess(resp);
+                } else if (xhr.readyState == 4) {
+                    /*xhr fail*/
+                    var _resp = _this2.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
+                    _this2.uploadFail(_resp);
+                }
+            } catch (e) {
+                /*超时抛出不一样的错误，不在这里处理*/
+                !scope.isTimeout && _this2.uploadError({ type: 'FINISHERROR', message: e.message });
+            }
+        };
+        /*xhr error*/
+        xhr.onerror = function () {
+            try {
+                var resp = _this2.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
+                _this2.uploadError({ type: 'XHRERROR', message: resp });
+            } catch (e) {
+                _this2.uploadError({ type: 'XHRERROR', message: e.message });
+            }
+        };
+        /*这里部分浏览器实现不一致，而且IE没有这个方法*/
+        xhr.onprogress = xhr.upload.onprogress = function (progress) {
+            _this2.uploading(progress, mill);
+        };
+
+        /*不带文件上传，给秒传使用*/
+        this._withoutFileUpload ? xhr.send(null) : xhr.send(formData);
+
+        /*保存xhr id*/
+        xhrList.push(xhr);
+        var cID = xhrList.length - 1;
+        currentXHRID = cID;
+
+        /*有响应abort的情况*/
+        xhr.onabort = function () {
+            return _this2.onabort(mill, cID);
+        };
+
+        /*trigger执行上传的用户回调*/
+        this.doUpload(this.files, mill, currentXHRID);
+
+        /*清除input的值*/
+        this.refs['ajax_upload_file_input'].value = '';
+    },
+
+
+    /*组装自定义添加到FormData的对象*/
+    appendFieldsToFormData: function appendFieldsToFormData(formData) {
+        var field = typeof this.paramAddToField == 'function' ? this.paramAddToField() : this.paramAddToField;
+        field && Object.keys(field).map(function (index) {
+            return formData.append(index, field[index]);
+        });
+        return formData;
+    },
+
+
     /*iE选择前验证*/
     /*触发beforeChoose*/
     IEBeforeChoose: function IEBeforeChoose(e) {
@@ -286,7 +414,7 @@ var FileUpload = React.createClass({
     /*IE处理上传函数*/
     /*触发beforeUpload doUpload*/
     IEUpload: function IEUpload(e) {
-        var _this2 = this;
+        var _this3 = this;
 
         var mill = new Date().getTime();
         var jud = this.beforeUpload(this.fileName, mill);
@@ -305,7 +433,7 @@ var FileUpload = React.createClass({
         if (param) {
             var paramArr = [];
             param['_'] = mill;
-            param['ie'] = 'true';
+            param['ie'] === undefined && (param['ie'] = 'true');
             for (var key in param) {
                 if (param[key] != undefined) paramArr.push(key + '=' + param[key]);
             }
@@ -321,7 +449,7 @@ var FileUpload = React.createClass({
 
         var progressInterval = setInterval(function () {
             loaded = getFakeProgress(loaded);
-            _this2.uploading({
+            _this3.uploading({
                 loaded: loaded,
                 total: 100
             }, mill);
@@ -380,142 +508,42 @@ var FileUpload = React.createClass({
         return dataType == 'json' ? resp.json : resp.responseText;
     },
 
-    /*执行上传*/
-    commonUpload: function commonUpload() {
-        var _this3 = this;
 
-        /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
-        var mill = this.files.length && this.files[0].mill || new Date().getTime();
-        var jud = this.beforeUpload(this.files, mill);
-        if (jud != true && jud != undefined && (typeof jud === 'undefined' ? 'undefined' : _typeof(jud)) != 'object') {
-            /*清除input的值*/
-            this.refs['ajax_upload_file_input'].value = '';
-            return;
-        }
+    /*外部调用方法，主动触发选择文件（等同于调用btn.click()), 仅支持现代浏览器*/
+    forwardChoose: function forwardChoose() {
+        if (this.isIE) return false;
+        this.commonChooseFile();
+    },
 
-        if (!this.files) return;
-        if (!this.baseUrl) throw new Error('baseUrl missing in options');
 
-        /*用于存放当前作用域的东西*/
-        var scope = {};
-        /*组装FormData*/
-        var formData = new FormData();
-        if (!this._withoutFileUpload) {
-            (function () {
-                var fieldNameType = _typeof(_this3.fileFieldName);
+    /**
+     * 外部调用方法，当多文件上传时，用这个方法主动删除列表中某个文件
+     * TODO: 此方法应为可以任意操作文件数组
+     * @param func 用户调用时传入的函数，函数接收参数files（filesAPI 对象）
+     * @return Obj File API 对象
+     * File API Obj:
+     * {
+     *   0 : file,
+     *   1 : file,
+     *   length : 2
+     * }
+     */
+    fowardRemoveFile: function fowardRemoveFile(func) {
+        this.files = func(this.files);
+    },
 
-                /*判断是用什么方式作为formdata item 的 name*/
-                Object.keys(_this3.files).forEach(function (key) {
-                    if (key == 'length') return;
 
-                    if (fieldNameType == 'function') {
-                        var file = _this3.files[key];
-                        var fileFieldName = _this3.fileFieldName(file);
-                        formData.append(fileFieldName, file);
-                    } else if (fieldNameType == 'string') {
-                        var _file = _this3.files[key];
-                        formData.append(_this3.fileFieldName, _file);
-                    } else {
-                        var _file2 = _this3.files[key];
-                        formData.append(_file2.name, _file2);
-                    }
-                });
+    /*外部调用方法，传入files（File API）对象可以立刻执行上传动作，IE不支持。调用随后会触发beforeUpload*/
+    filesToUpload: function filesToUpload(files) {
+        if (this.isIE) return;
+        this.files = files;
+        this.commonUpload();
+    },
 
-                var fieldName = _this3.fileFieldName ? _this3.fileFieldName : 'name';
-            })();
-        }
-        /*组装自定义添加到FormData的对象*/
 
-        var field = typeof this.paramAddToField == 'function' ? this.paramAddToField() : this.paramAddToField;
-        field && Object.keys(field).map(function (index) {
-            return formData.append(index, field[index]);
-        });
-
-        var baseUrl = this.baseUrl;
-
-        /*url参数*/
-        /*如果param是一个函数*/
-        var param = typeof this.param === 'function' ? this.param(this.files) : this.param;
-
-        var paramStr = '';
-
-        if (param) {
-            (function () {
-                var paramArr = [];
-                param['_'] = mill;
-                Object.keys(param).forEach(function (key) {
-                    return paramArr.push(key + '=' + param[key]);
-                });
-                paramStr = '?' + paramArr.join('&');
-            })();
-        }
-        var targeturl = baseUrl + paramStr;
-
-        /*AJAX上传部分*/
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', targeturl, true);
-
-        /*跨域是否开启验证信息*/
-        xhr.withCredentials = this.withCredentials;
-        /*是否需要设置请求头*/
-        var rh = this.requestHeaders;
-        rh && Object.keys(rh).forEach(function (key) {
-            return xhr.setRequestHeader(key, rh[key]);
-        });
-
-        //xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded charset=UTF-8')
-
-        /*处理超时。用定时器判断超时，不然xhr state=4 catch的错误无法判断是超时*/
-        if (this.timeout) {
-            xhr.timeout = this.timeout;
-            xhr.ontimeout = function () {
-                _this3.uploadError({ type: 'TIMEOUTERROR', message: 'timeout' });
-                scope.isTimeout = false;
-            };
-            scope.isTimeout = false;
-            setTimeout(function () {
-                scope.isTimeout = true;
-            }, this.timeout);
-        }
-
-        xhr.onreadystatechange = function () {
-            /*xhr finish*/
-            try {
-                if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 400) {
-                    var resp = _this3.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
-                    _this3.uploadSuccess(resp);
-                } else if (xhr.readyState == 4) {
-                    /*xhr fail*/
-                    var _resp = _this3.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
-                    _this3.uploadFail(_resp);
-                }
-            } catch (e) {
-                /*超时抛出不一样的错误，不在这里处理*/
-                !scope.isTimeout && _this3.uploadError({ type: 'FINISHERROR', message: e.message });
-            }
-        };
-        /*xhr error*/
-        xhr.onerror = function () {
-            try {
-                var resp = _this3.dataType == 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
-                _this3.uploadError({ type: 'XHRERROR', message: resp });
-            } catch (e) {
-                _this3.uploadError({ type: 'XHRERROR', message: e.message });
-            }
-        };
-        /*这里部分浏览器实现不一致，而且IE没有这个方法*/
-        xhr.onprogress = xhr.upload.onprogress = function (progress) {
-            _this3.uploading(progress, mill);
-        };
-
-        /*不带文件上传，给秒传使用*/
-        this._withoutFileUpload ? xhr.send(null) : xhr.send(formData);
-
-        /*trigger执行上传的用户回调*/
-        this.doUpload(this.files, mill);
-
-        /*清除input的值*/
-        this.refs['ajax_upload_file_input'].value = '';
+    /*外部调用方法，取消一个正在进行的xhr，传入id指定xhr（doupload时返回）或者默认取消最近一个。*/
+    abort: function abort(id) {
+        id === undefined ? xhrList[currentXHRID].abort() : xhrList[id].abort();
     },
 
 
