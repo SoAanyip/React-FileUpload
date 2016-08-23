@@ -32,27 +32,28 @@ var sharedConfig = {
     }
 };
 
+var devBundleConfig = Object.assign({}, sharedConfig, {
+    entry: {
+        'main': entry
+    }
+}); 
+
+var prodBundleConfig = Object.assign({}, sharedConfig, {
+    entry: {
+        'main.min': entry 
+    },
+    plugins: [
+        new webpack.optimize.OccurenceOrderPlugin(),        
+        new webpack.optimize.UglifyJsPlugin({
+            compressor: {
+            screw_ie8: true,
+            warnings: false
+            }
+        })
+    ]
+});
+
 module.exports = [
-
-    Object.assign({}, sharedConfig, {
-        entry: {
-            'main': entry
-        }
-    }),
-    
-    Object.assign({}, sharedConfig, {
-        entry: {
-            'main.min': entry 
-        },
-        plugins: [
-            new webpack.optimize.OccurenceOrderPlugin(),        
-            new webpack.optimize.UglifyJsPlugin({
-                compressor: {
-                screw_ie8: true,
-                warnings: false
-                }
-            })
-        ]
-    })
-
+    devBundleConfig,
+    prodBundleConfig
 ];
