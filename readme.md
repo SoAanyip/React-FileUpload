@@ -95,6 +95,7 @@ numberLimit | number/func | false | Limit how much file that user can choose in 
 fileFieldName | string/func | false | When a file is added to formData, defaulting file name as key. When is a string, use it. And When is a func, use return value. Func will receive the File object as argument.
 withCredentials | boolean | false | Same as `xhr.withCredentials`.
 requestHeaders | object | false | Key-values that will be set using  `xhr.setRequestHeader(key, value)`.
+userAgent | string | undefined | Used to set the User Agent String when serverside rendering isomorphic applications. (required when rendering on the server)
 
 ### Life circle functions ###
 Also set as the properties of options.
@@ -310,7 +311,7 @@ options:{
     //fileFieldName : 'file',
     fileFieldName(file){ return file.name },
     withCredentials: false,
-	requestHeaders: {'User-Agent': 'So Aanyip'},
+	  requestHeaders: {'User-Agent': 'So Aanyip'},
     beforeChoose : function()[
         return user.isAllowUpload
     },
@@ -341,6 +342,11 @@ options:{
         alert(resp)
     }
 }
+
+if (typeof window === 'undefined') {
+  options.userAgent = this.props.userAgentString;
+}
+
 ```
 
 An working example:
@@ -911,6 +917,10 @@ render() {
   )
 }
 ```
+## Development ##
+- npm install
+- npm start
+
 
 ## Contributor ##
 - [@Pritoj](https://github.com/Pritoj)

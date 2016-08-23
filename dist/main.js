@@ -15,7 +15,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  */
 
 /*eslint indent: 0 */
-var React = require('react')
+var React = require('react');
 var emptyFunction = function emptyFunction() {};
 /*当前IE上传组的id*/
 var currentIEID = 0;
@@ -50,6 +50,7 @@ var FileUpload = React.createClass({
             requestHeaders: PT.object,
             /*specials*/
             tag: PT.string,
+            userAgent: PT.string,
             disabledIEChoose: PT.oneOfType([PT.bool, PT.func]),
             _withoutFileUpload: PT.bool,
             filesToUpload: PT.arrayOf(PT.object),
@@ -549,7 +550,7 @@ var FileUpload = React.createClass({
 
     /*判断ie版本*/
     checkIE: function checkIE() {
-        var userAgent = navigator.userAgent;
+        var userAgent = this.userAgent;
         var version = userAgent.indexOf('MSIE');
         if (version < 0) return -1;
 
@@ -574,6 +575,14 @@ var FileUpload = React.createClass({
             return start;
         };
     },
+    getUserAgent: function getUserAgent() {
+        var userAgentString = this.props.options.userAgent;
+        var navigatorIsAvailable = typeof navigator !== 'undefined';
+        if (!navigatorIsAvailable && !userAgentString) {
+            throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
+        }
+        return navigatorIsAvailable ? navigator.userAgent : userAgentString;
+    },
     getInitialState: function getInitialState() {
         return {
             chooseBtn: {}, //选择按钮。如果chooseAndUpload=true代表选择并上传。
@@ -584,6 +593,7 @@ var FileUpload = React.createClass({
         };
     },
     componentWillMount: function componentWillMount() {
+        this.userAgent = this.getUserAgent();
         this.isIE = !(this.checkIE() < 0 || this.checkIE() >= 10);
         /*因为IE每次要用到很多form组，如果在同一页面需要用到多个<FileUpload>可以在options传入tag作为区分。并且不随后续props改变而改变*/
         var tag = this.props.options && this.props.options.tag;
