@@ -8,10 +8,7 @@
     "build": "webpack",
     "build:watch": "npm run build -- -w",
     "start": "npm run build:watch"
-  },
-  "pre-commit": [
-    "build"
-  ],
+  },  
   "keywords": [
     "upload",
     "react",
