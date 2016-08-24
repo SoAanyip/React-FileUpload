@@ -15,6 +15,7 @@
   * [Component Functions](#component-functions)
   * [Children](#children)
 * [Examples](#examples)
+* [Development](#development)
 * [Contributor](#contributor)
 * [Change-log](#change-log)
 * [License](#license)
@@ -30,6 +31,7 @@
   * [组件方法](#组件方法)
   * [Children](#children)
 * [例子](#例子)
+* [Development](#development)
 * [Contributor](#contributor)
 * [Change-log](#change-log)
 * [License](#license)
@@ -535,6 +537,7 @@ numberLimit | number/func | false | 多文件上传时限制用户选择的数�
 fileFieldName | string/func | false | 文件添加到formData时，默认用file.name作为key。传入string会直接使用此string作为key，若为func则取返回值，func的参数为对应的file对象。
 withCredentials | boolean | false | 与 `xhr.withCredentials` 一致。
 requestHeaders | object | false | 对象中的键值对会作为 `xhr.setRequestHeader(key, value)` 的参数。
+userAgent | string | undefined | 在服务器端渲染同构应用时可以自己设定User Agent。(例如在组件内部是通过navigator的userAgent来判定浏览器的，服务器端获取不到navigator)
 
 
 ### 生命周期函数 ###
@@ -789,6 +792,10 @@ options:{
         alert(resp)
     }
 }
+
+if (typeof window === 'undefined') {
+  options.userAgent = this.props.userAgentString;
+}
 ```
 
 一个实际应用的例子：
@@ -917,15 +924,20 @@ render() {
   )
 }
 ```
+
 ## Development ##
 - npm install
 - npm start
 
-
 ## Contributor ##
 - [@Pritoj](https://github.com/Pritoj)
+- [@David Stevens](https://github.com/davidstevens37)
 
 ## Change-log ##
+
+### 2.4.0 ###
+- Add property `userAgent`, thanks [@David Stevens](https://github.com/davidstevens37).
+- Add Webpack build scripts, thanks [@David Stevens](https://github.com/davidstevens37).
 
 ### 2.3.0 ###
 - Add special property `textBeforeFiles`, thanks [@Pritoj](https://github.com/Pritoj).

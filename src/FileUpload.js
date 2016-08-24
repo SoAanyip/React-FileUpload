@@ -551,7 +551,7 @@ const FileUpload = React.createClass({
     },
 
     getUserAgent() {
-        const userAgentString = this.props.options.userAgent;
+        const userAgentString = this.props.options && this.props.options.userAgent;
         const navigatorIsAvailable = typeof navigator !== 'undefined';        
         if (!navigatorIsAvailable && !userAgentString) {
             throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
