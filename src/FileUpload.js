@@ -42,6 +42,7 @@ const FileUpload = React.createClass({
             requestHeaders: PT.object,
             /*specials*/
             tag: PT.string,
+            userAgent: PT.string,
             disabledIEChoose: PT.oneOfType([PT.bool, PT.func]),
             _withoutFileUpload: PT.bool,
             filesToUpload: PT.arrayOf(PT.object),
@@ -193,7 +194,6 @@ const FileUpload = React.createClass({
             after
         })
     },
-
 
     /*触发隐藏的input框选择*/
     /*触发beforeChoose*/
@@ -525,7 +525,7 @@ const FileUpload = React.createClass({
 
     /*判断ie版本*/
     checkIE() {
-        const userAgent = navigator.userAgent
+        const userAgent = this.userAgent;
         const version = userAgent.indexOf('MSIE')
         if (version < 0) return -1
 
@@ -550,6 +550,15 @@ const FileUpload = React.createClass({
         }
     },
 
+    getUserAgent() {
+        const userAgentString = this.props.options.userAgent;
+        const navigatorIsAvailable = typeof navigator !== 'undefined';        
+        if (!navigatorIsAvailable && !userAgentString) {
+            throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
+        }
+        return navigatorIsAvailable ? navigator.userAgent : userAgentString;
+    },
+
     getInitialState() {
         return {
             chooseBtn: {},       //选择按钮。如果chooseAndUpload=true代表选择并上传。
@@ -561,6 +570,7 @@ const FileUpload = React.createClass({
     },
 
     componentWillMount() {
+        this.userAgent = this.getUserAgent();
         this.isIE = !(this.checkIE() < 0 || this.checkIE() >= 10)
         /*因为IE每次要用到很多form组，如果在同一页面需要用到多个<FileUpload>可以在options传入tag作为区分。并且不随后续props改变而改变*/
         const tag = this.props.options && this.props.options.tag

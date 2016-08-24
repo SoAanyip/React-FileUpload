@@ -4,8 +4,11 @@
   "description": "Upload files async with xhr2 or iframe for IE. Supporting IE8+. Doing well in Tencent.",
   "main": "dist/main.min.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+    "test": "echo \"Error: no test specified\" && exit 1",    
+    "build": "webpack",
+    "build:watch": "npm run build -- -w",
+    "start": "npm run build:watch"
+  },  
   "keywords": [
     "upload",
     "react",
