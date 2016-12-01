@@ -686,9 +686,9 @@ const FileUpload = React.createClass({
                 accept: this.accept,
                 disabled: isDisabled
             }
-
+            //EDIT file field name to use this.fileFieldName instead of `ajax_upload_hidden_input_${i}`
             const input =
-                <input type="file" name={`ajax_upload_hidden_input_${i}`} id={`ajax_upload_hidden_input_${i}`}
+                <input type="file" name={this.fileFieldName} id={`ajax_upload_hidden_input_${i}`}
                     ref={`ajax_upload_hidden_input_${i}`} onChange={this.IEChooseFile} onClick={this.IEBeforeChoose}
                     style={style} {...restAttrs}
                 />

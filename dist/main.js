@@ -58,7 +58,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	/**
 	 * Created by cheesu on 2015/8/17.
@@ -632,7 +632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    },
 	    getUserAgent: function getUserAgent() {
-	        var userAgentString = this.props.options.userAgent;
+	        var userAgentString = this.props.options && this.props.options.userAgent;
 	        var navigatorIsAvailable = typeof navigator !== 'undefined';
 	        if (!navigatorIsAvailable && !userAgentString) {
 	            throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
@@ -762,8 +762,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                accept: this.accept,
 	                disabled: isDisabled
 	            };
-
-	            var input = React.createElement('input', _extends({ type: 'file', name: 'ajax_upload_hidden_input_' + i, id: 'ajax_upload_hidden_input_' + i,
+	            //EDIT fileName
+	            var input = React.createElement('input', _extends({ type: 'file', name: this.fileFieldName, id: 'ajax_upload_hidden_input_' + i,
 	                ref: 'ajax_upload_hidden_input_' + i, onChange: this.IEChooseFile, onClick: this.IEBeforeChoose,
 	                style: style }, restAttrs));
 
