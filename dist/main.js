@@ -762,7 +762,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                accept: this.accept,
 	                disabled: isDisabled
 	            };
-	            //EDIT fileName
+	            //EDIT file field name to use this.fileFieldName instead of `ajax_upload_hidden_input_${i}`
 	            var input = React.createElement('input', _extends({ type: 'file', name: this.fileFieldName, id: 'ajax_upload_hidden_input_' + i,
 	                ref: 'ajax_upload_hidden_input_' + i, onChange: this.IEChooseFile, onClick: this.IEBeforeChoose,
 	                style: style }, restAttrs));
