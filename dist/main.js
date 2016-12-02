@@ -58,7 +58,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	/**
 	 * Created by cheesu on 2015/8/17.
@@ -120,7 +120,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            uploadSuccess: PT.func,
 	            uploadError: PT.func,
 	            uploadFail: PT.func,
-	            onabort: PT.func
+	            onabort: PT.func,
+	            IE9_optionalFile: PT.bool
 	        }).isRequired,
 	        style: PT.object,
 	        className: PT.string
@@ -219,6 +220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._withoutFileUpload = options._withoutFileUpload || false; //不带文件上传，为了给秒传功能使用，不影响IE
 	        this.filesToUpload = options.filesToUpload || []; //使用filesToUpload()方法代替
 	        this.textBeforeFiles = options.textBeforeFiles || false; //make this true to add text fields before file data
+	        this.IE9_optionalFile = options.IE9_optionalFile || false;
 	        /*使用filesToUpload()方法代替*/
 	        if (this.filesToUpload.length && !this.isIE) {
 	            this.filesToUpload.forEach(function (file) {
@@ -475,10 +477,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var mill = new Date().getTime();
 	        var jud = this.beforeUpload(this.fileName, mill);
-	        if (!this.fileName || jud != true && jud != undefined) {
+
+	        //EDIT Added use of this.IE9_optionalFile, if it's true, we don't want to stop the request
+	        if (!this.IE9_optionalFile && (!this.fileName || jud != true && jud != undefined)) {
 	            e && e.preventDefault();
 	            return false;
 	        }
+
 	        var that = this;
 
 	        /*url参数*/
@@ -632,7 +637,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    },
 	    getUserAgent: function getUserAgent() {
-	        var userAgentString = this.props.options.userAgent;
+	        var userAgentString = this.props.options && this.props.options.userAgent;
 	        var navigatorIsAvailable = typeof navigator !== 'undefined';
 	        if (!navigatorIsAvailable && !userAgentString) {
 	            throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
