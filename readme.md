@@ -314,7 +314,7 @@ options:{
     fileFieldName(file){ return file.name },
     withCredentials: false,
 	  requestHeaders: {'User-Agent': 'So Aanyip'},
-    beforeChoose : function()[
+    beforeChoose : function(){
         return user.isAllowUpload
     },
     chooseFile : function(files){
@@ -762,7 +762,7 @@ options:{
     fileFieldName(file){ return file.name },
     withCredentials: false,
 	requestHeaders: {'User-Agent': 'So Aanyip'},
-    beforeChoose : function()[
+    beforeChoose : function(){
         return user.isAllowUpload
     },
     chooseFile : function(files){
