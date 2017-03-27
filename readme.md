@@ -321,7 +321,7 @@ options:{
         console.log('you choose',typeof files == 'string' ? files : files[0].name)
     },
     beforeUpload : function(files,mill){
-        if(typeof files == string) return true
+        if(typeof files == 'string') return true
         if(files[0].size<1024*1024*20){
             files[0].mill = mill
             return true
@@ -769,7 +769,7 @@ options:{
         console.log('you choose',typeof files == 'string' ? files : files[0].name)
     },
     beforeUpload : function(files,mill){
-        if(typeof files == string) return true
+        if(typeof files == 'string') return true
         if(files[0].size<1024*1024*20){
             files[0].mill = mill
             return true
