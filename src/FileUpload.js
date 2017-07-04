@@ -61,6 +61,8 @@ const FileUpload = React.createClass({
         style: PT.object,
         className: PT.string
     },
+    IEFormGroup: [true],
+    currentIEID: 0,
 
     /*根据props更新组件*/
     _updateProps(props) {
@@ -221,7 +223,7 @@ const FileUpload = React.createClass({
         this.chooseFile(files)
         this.chooseAndUpload && this.commonUpload()
     },
-    
+
     /*执行上传*/
     commonUpload() {
         /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
@@ -385,7 +387,7 @@ const FileUpload = React.createClass({
         this.chooseFile(this.fileName)
         /*先执行IEUpload，配置好action等参数，然后submit*/
         this.chooseAndUpload && (this.IEUpload() !== false) &&
-            document.getElementById(`ajax_upload_file_form_${this.IETag}${currentIEID}`).submit()
+            document.getElementById(`ajax_upload_file_form_${this.IETag}${+this.currentIEID}_${this.props.startIEID}`).submit()
         e.target.blur()
     },
     /*IE处理上传函数*/
@@ -416,7 +418,7 @@ const FileUpload = React.createClass({
         }
         const targeturl = baseUrl + paramStr
 
-        document.getElementById(`ajax_upload_file_form_${this.IETag}${currentIEID}`).setAttribute('action', targeturl)
+        document.getElementById(`ajax_upload_file_form_${this.IETag}${+this.currentIEID}_${this.props.startIEID}`).setAttribute('action', targeturl)
         /*IE假的上传进度*/
         const getFakeProgress = this.fakeProgress()
         let loaded = 0,
@@ -434,11 +436,11 @@ const FileUpload = React.createClass({
 
 
         /*当前上传id*/
-        const partIEID = currentIEID
+        const partIEID = +this.currentIEID
         /*回调函数*/
         window.attachEvent ?
-          document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}`).attachEvent('onload', handleOnLoad) :
-          document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}`).addEventListener('load', handleOnLoad)
+          document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}_${this.props.startIEID}`).attachEvent('onload', handleOnLoad) :
+          document.getElementById(`ajax_upload_file_frame_${this.IETag}${partIEID}_${this.props.startIEID}`).addEventListener('load', handleOnLoad)
 
 
         function handleOnLoad() {
@@ -450,22 +452,22 @@ const FileUpload = React.createClass({
                 that.uploadError(e)
             } finally {
                 /*清除输入框的值*/
-                const oInput = document.getElementById(`ajax_upload_hidden_input_${that.IETag}${partIEID}`)
+                const oInput = document.getElementById(`ajax_upload_hidden_input_${that.IETag}${partIEID}_${that.props.startIEID}`)
                 oInput.outerHTML = oInput.outerHTML
             }
         }
         this.doUpload(this.fileName, mill)
         /*置为非空闲*/
-        IEFormGroup[currentIEID] = false
+        this.IEFormGroup[this.currentIEID] = false
 
     },
     /*IE回调函数*/
     //TODO 处理Timeout
     IECallback(dataType, frameId) {
         /*回复空闲状态*/
-        IEFormGroup[frameId] = true
+        this.IEFormGroup[frameId] = true
 
-        const frame = document.getElementById(`ajax_upload_file_frame_${this.IETag}${frameId}`)
+        const frame = document.getElementById(`ajax_upload_file_frame_${this.IETag}${+frameId}_${this.props.startIEID}`)
         const resp = {}
         const content = frame.contentWindow ? frame.contentWindow.document.body : frame.contentDocument.document.body
         if(!content) throw new Error('Your browser does not support async upload')
@@ -518,7 +520,7 @@ const FileUpload = React.createClass({
 
     /*外部调用方法，取消一个正在进行的xhr，传入id指定xhr（doupload时返回）或者默认取消最近一个。*/
     abort(id) {
-        id === undefined ? 
+        id === undefined ?
             xhrList[currentXHRID].abort() :
             xhrList[id].abort()
     },
@@ -552,7 +554,7 @@ const FileUpload = React.createClass({
 
     getUserAgent() {
         const userAgentString = this.props.options && this.props.options.userAgent;
-        const navigatorIsAvailable = typeof navigator !== 'undefined';        
+        const navigatorIsAvailable = typeof navigator !== 'undefined';
         if (!navigatorIsAvailable && !userAgentString) {
             throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
         }
@@ -646,15 +648,15 @@ const FileUpload = React.createClass({
           typeof this.disabledIEChoose === 'function' ? this.disabledIEChoose() : this.disabledIEChoose
 
         /*这里IEFormGroup的长度会变，所以不能存len*/
-        for(let i = 0; i<IEFormGroup.length;  i++) {
+        for(let i = 0; i<this.IEFormGroup.length;  i++) {
             _insertIEForm.call(this,formArr,i)
             /*如果当前上传组是空闲，hasFree=true，并且指定当前上传组ID*/
-            if(IEFormGroup[i] && !hasFree) {
+            if(this.IEFormGroup[i] && !hasFree) {
                 hasFree = true
-                currentIEID = i
+                this.currentIEID = i
             }
             /*如果所有上传组都不是空闲状态，push一个新增组*/
-            (i==IEFormGroup.length-1) && !hasFree && IEFormGroup.push(true)
+            (i==this.IEFormGroup.length-1) && !hasFree && this.IEFormGroup.push(true)
 
         }
 
@@ -666,9 +668,9 @@ const FileUpload = React.createClass({
 
         function _insertIEForm(formArr,i) {
             /*如果已经push了空闲组而当前也是空闲组*/
-            if(IEFormGroup[i] && hasFree) return
+            if(this.IEFormGroup[i] && hasFree) return
             /*是否display*/
-            const isShow = IEFormGroup[i]
+            const isShow = this.IEFormGroup[i]
             /*Input内联样式*/
             const style = {
                 position:'absolute',
@@ -688,12 +690,12 @@ const FileUpload = React.createClass({
             }
 
             const input =
-                <input type="file" name={`ajax_upload_hidden_input_${i}`} id={`ajax_upload_hidden_input_${i}`}
+                <input className="ajax_upload_hidden_input_file" type="file" name={`ajax_upload_hidden_input_${+i}_${this.props.startIEID}`} id={`ajax_upload_hidden_input_${i}_${this.props.startIEID}`}
                     ref={`ajax_upload_hidden_input_${i}`} onChange={this.IEChooseFile} onClick={this.IEBeforeChoose}
                     style={style} {...restAttrs}
                 />
 
-            i = `${this.IETag}${i}`
+            i = `${this.IETag}${+i}_${this.props.startIEID}`
             formArr.push((
                 <form id={`ajax_upload_file_form_${i}`} method="post" target={`ajax_upload_file_frame_${i}`}
                     key={`ajax_upload_file_form_${i}`}
@@ -748,4 +750,8 @@ const FileUpload = React.createClass({
 
 })
 
-module.exports = FileUpload
+module.exports = props => {
+    currentIEID++
+    IEFormGroup.push(true)
+    return <FileUpload {...props} startIEID={currentIEID} />
+}
