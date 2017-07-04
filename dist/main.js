@@ -52,13 +52,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	/**
 	 * Created by cheesu on 2015/8/17.
@@ -125,6 +125,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        style: PT.object,
 	        className: PT.string
 	    },
+	    IEFormGroup: [true],
+	    currentIEID: 0,
 
 	    /*根据props更新组件*/
 	    _updateProps: function _updateProps(props) {
@@ -320,26 +322,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            formData = this.appendFieldsToFormData(formData);
 	        }
 	        if (!this._withoutFileUpload) {
-	            (function () {
-	                var fieldNameType = _typeof(_this2.fileFieldName);
+	            var fieldNameType = _typeof(this.fileFieldName);
 
-	                /*判断是用什么方式作为formdata item 的 name*/
-	                Object.keys(_this2.files).forEach(function (key) {
-	                    if (key == 'length') return;
+	            /*判断是用什么方式作为formdata item 的 name*/
+	            Object.keys(this.files).forEach(function (key) {
+	                if (key == 'length') return;
 
-	                    if (fieldNameType == 'function') {
-	                        var file = _this2.files[key];
-	                        var fileFieldName = _this2.fileFieldName(file);
-	                        formData.append(fileFieldName, file);
-	                    } else if (fieldNameType == 'string') {
-	                        var _file = _this2.files[key];
-	                        formData.append(_this2.fileFieldName, _file);
-	                    } else {
-	                        var _file2 = _this2.files[key];
-	                        formData.append(_file2.name, _file2);
-	                    }
-	                });
-	            })();
+	                if (fieldNameType == 'function') {
+	                    var file = _this2.files[key];
+	                    var fileFieldName = _this2.fileFieldName(file);
+	                    formData.append(fileFieldName, file);
+	                } else if (fieldNameType == 'string') {
+	                    var _file = _this2.files[key];
+	                    formData.append(_this2.fileFieldName, _file);
+	                } else {
+	                    var _file2 = _this2.files[key];
+	                    formData.append(_file2.name, _file2);
+	                }
+	            });
 	        }
 	        /*If we need to add fields after file data append here*/
 	        if (!this.textBeforeFiles) {
@@ -354,14 +354,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var paramStr = '';
 
 	        if (param) {
-	            (function () {
-	                var paramArr = [];
-	                param['_'] = mill;
-	                Object.keys(param).forEach(function (key) {
-	                    return paramArr.push(key + '=' + param[key]);
-	                });
-	                paramStr = '?' + paramArr.join('&');
-	            })();
+	            var paramArr = [];
+	            param['_'] = mill;
+	            Object.keys(param).forEach(function (key) {
+	                return paramArr.push(key + '=' + param[key]);
+	            });
+	            paramStr = '?' + paramArr.join('&');
 	        }
 	        var targeturl = baseUrl + paramStr;
 
@@ -464,7 +462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.fileName = e.target.value.substring(e.target.value.lastIndexOf('\\') + 1);
 	        this.chooseFile(this.fileName);
 	        /*先执行IEUpload，配置好action等参数，然后submit*/
-	        this.chooseAndUpload && this.IEUpload() !== false && document.getElementById('ajax_upload_file_form_' + this.IETag + currentIEID).submit();
+	        this.chooseAndUpload && this.IEUpload() !== false && document.getElementById('ajax_upload_file_form_' + this.IETag + +this.currentIEID + '_' + this.props.startIEID).submit();
 	        e.target.blur();
 	    },
 
@@ -498,7 +496,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var targeturl = baseUrl + paramStr;
 
-	        document.getElementById('ajax_upload_file_form_' + this.IETag + currentIEID).setAttribute('action', targeturl);
+	        document.getElementById('ajax_upload_file_form_' + this.IETag + +this.currentIEID + '_' + this.props.startIEID).setAttribute('action', targeturl);
 	        /*IE假的上传进度*/
 	        var getFakeProgress = this.fakeProgress();
 	        var loaded = 0,
@@ -515,9 +513,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, 200);
 
 	        /*当前上传id*/
-	        var partIEID = currentIEID;
+	        var partIEID = +this.currentIEID;
 	        /*回调函数*/
-	        window.attachEvent ? document.getElementById('ajax_upload_file_frame_' + this.IETag + partIEID).attachEvent('onload', handleOnLoad) : document.getElementById('ajax_upload_file_frame_' + this.IETag + partIEID).addEventListener('load', handleOnLoad);
+	        window.attachEvent ? document.getElementById('ajax_upload_file_frame_' + this.IETag + partIEID + '_' + this.props.startIEID).attachEvent('onload', handleOnLoad) : document.getElementById('ajax_upload_file_frame_' + this.IETag + partIEID + '_' + this.props.startIEID).addEventListener('load', handleOnLoad);
 
 	        function handleOnLoad() {
 	            /*clear progress interval*/
@@ -528,22 +526,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                that.uploadError(e);
 	            } finally {
 	                /*清除输入框的值*/
-	                var oInput = document.getElementById('ajax_upload_hidden_input_' + that.IETag + partIEID);
+	                var oInput = document.getElementById('ajax_upload_hidden_input_' + that.IETag + partIEID + '_' + that.props.startIEID);
 	                oInput.outerHTML = oInput.outerHTML;
 	            }
 	        }
 	        this.doUpload(this.fileName, mill);
 	        /*置为非空闲*/
-	        IEFormGroup[currentIEID] = false;
+	        this.IEFormGroup[this.currentIEID] = false;
 	    },
 
 	    /*IE回调函数*/
 	    //TODO 处理Timeout
 	    IECallback: function IECallback(dataType, frameId) {
 	        /*回复空闲状态*/
-	        IEFormGroup[frameId] = true;
+	        this.IEFormGroup[frameId] = true;
 
-	        var frame = document.getElementById('ajax_upload_file_frame_' + this.IETag + frameId);
+	        var frame = document.getElementById('ajax_upload_file_frame_' + this.IETag + +frameId + '_' + this.props.startIEID);
 	        var resp = {};
 	        var content = frame.contentWindow ? frame.contentWindow.document.body : frame.contentDocument.document.body;
 	        if (!content) throw new Error('Your browser does not support async upload');
@@ -632,7 +630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    },
 	    getUserAgent: function getUserAgent() {
-	        var userAgentString = this.props.options.userAgent;
+	        var userAgentString = this.props.options && this.props.options.userAgent;
 	        var navigatorIsAvailable = typeof navigator !== 'undefined';
 	        if (!navigatorIsAvailable && !userAgentString) {
 	            throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
@@ -723,15 +721,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var isDisabled = typeof this.disabledIEChoose === 'function' ? this.disabledIEChoose() : this.disabledIEChoose;
 
 	        /*这里IEFormGroup的长度会变，所以不能存len*/
-	        for (var i = 0; i < IEFormGroup.length; i++) {
+	        for (var i = 0; i < this.IEFormGroup.length; i++) {
 	            _insertIEForm.call(this, formArr, i);
 	            /*如果当前上传组是空闲，hasFree=true，并且指定当前上传组ID*/
-	            if (IEFormGroup[i] && !hasFree) {
+	            if (this.IEFormGroup[i] && !hasFree) {
 	                hasFree = true;
-	                currentIEID = i;
+	                this.currentIEID = i;
 	            }
 	            /*如果所有上传组都不是空闲状态，push一个新增组*/
-	            i == IEFormGroup.length - 1 && !hasFree && IEFormGroup.push(true);
+	            i == this.IEFormGroup.length - 1 && !hasFree && this.IEFormGroup.push(true);
 	        }
 
 	        return React.createElement(
@@ -742,9 +740,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        function _insertIEForm(formArr, i) {
 	            /*如果已经push了空闲组而当前也是空闲组*/
-	            if (IEFormGroup[i] && hasFree) return;
+	            if (this.IEFormGroup[i] && hasFree) return;
 	            /*是否display*/
-	            var isShow = IEFormGroup[i];
+	            var isShow = this.IEFormGroup[i];
 	            /*Input内联样式*/
 	            var style = {
 	                position: 'absolute',
@@ -755,19 +753,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                width: '200px',
 	                opacity: 0,
 	                filter: 'alpha(opacity=0)'
-	            };
 
-	            /*是否限制了文件后缀，以及是否disabled*/
-	            var restAttrs = {
+	                /*是否限制了文件后缀，以及是否disabled*/
+	            };var restAttrs = {
 	                accept: this.accept,
 	                disabled: isDisabled
-	            };
-
-	            var input = React.createElement('input', _extends({ type: 'file', name: 'ajax_upload_hidden_input_' + i, id: 'ajax_upload_hidden_input_' + i,
+	                /*在IE9中input被渲染后需要将name改为file*/
+	            };var input = React.createElement('input', _extends({ className: 'ajax_upload_hidden_input_file', type: 'file', name: 'ajax_upload_hidden_input_' + +i + '_' + this.props.startIEID, id: 'ajax_upload_hidden_input_' + i + '_' + this.props.startIEID,
 	                ref: 'ajax_upload_hidden_input_' + i, onChange: this.IEChooseFile, onClick: this.IEBeforeChoose,
 	                style: style }, restAttrs));
 
-	            i = '' + this.IETag + i;
+	            i = '' + this.IETag + +i + '_' + this.props.startIEID;
 	            formArr.push(React.createElement(
 	                'form',
 	                { id: 'ajax_upload_file_form_' + i, method: 'post', target: 'ajax_upload_file_frame_' + i,
@@ -821,15 +817,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	module.exports = FileUpload;
+	module.exports = function (props) {
+	    currentIEID++;
+	    IEFormGroup.push(true);
+	    return React.createElement(FileUpload, _extends({}, props, { startIEID: currentIEID }));
+	};
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
 
-/***/ }
+/***/ })
 /******/ ])
 });
 ;

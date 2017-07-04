@@ -688,7 +688,7 @@ const FileUpload = React.createClass({
                 accept: this.accept,
                 disabled: isDisabled
             }
-
+            /*在IE9中input被渲染后需要将name改为file*/
             const input =
                 <input className="ajax_upload_hidden_input_file" type="file" name={`ajax_upload_hidden_input_${+i}_${this.props.startIEID}`} id={`ajax_upload_hidden_input_${i}_${this.props.startIEID}`}
                     ref={`ajax_upload_hidden_input_${i}`} onChange={this.IEChooseFile} onClick={this.IEBeforeChoose}
