@@ -9,48 +9,41 @@ var sharedConfig = {
         library: 'react-fileupload',
         libraryTarget: 'umd'
     },
-    module:{
-        loaders: [{
-            test: /\.jsx?$/,
-            loader: "babel",
-            query: {
-              presets: ['react','es2015']
-            }            
+    module: {
+        rules: [{
+            test: /\.js$/,
+            exclude: /(node_modules|tmp)/,
+            loader: 'babel-loader'
         }]
     },
     externals: [{
-            'react': {
-                root: 'React',
-                commonjs2: 'react',
-                commonjs: 'react',
-                amd: 'react'
-            }
+        'react': {
+            root: 'React',
+            commonjs2: 'react',
+            commonjs: 'react',
+            amd: 'react'
         }
-    ],
-    resolve: {
-        extensions: ['', '.js']
-    }
+    }]
 };
 
 var devBundleConfig = Object.assign({}, sharedConfig, {
     entry: {
         'main': entry
     }
-}); 
+});
 
 var prodBundleConfig = Object.assign({}, sharedConfig, {
     entry: {
-        'main.min': entry 
-    },
+        'main.min': entry
+    }/*,
     plugins: [
-        new webpack.optimize.OccurenceOrderPlugin(),        
         new webpack.optimize.UglifyJsPlugin({
             compressor: {
-            screw_ie8: true,
-            warnings: false
+                screw_ie8: true,
+                warnings: false
             }
         })
-    ]
+    ]*/
 });
 
 module.exports = [
