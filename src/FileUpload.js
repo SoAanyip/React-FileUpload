@@ -283,7 +283,7 @@ const FileUpload = React.createClass({
             const paramArr = []
             param['_'] = mill
             Object.keys(param).forEach(key =>
-              paramArr.push(`${key}=${param[key]}`)
+              paramArr.push(`${key}=${encodeURIComponent(param[key])}`)
             )
             paramStr = '?' + paramArr.join('&')
         }
@@ -410,7 +410,7 @@ const FileUpload = React.createClass({
             param['_'] = mill
             param['ie'] === undefined && (param['ie'] = 'true')
             for (const key in param) {
-                if(param[key] != undefined) paramArr.push(`${key}=${param[key]}`)
+                if(param[key] != undefined) paramArr.push(`${key}=${encodeURIComponent(param[key])}`)
             }
             paramStr = '?' + paramArr.join('&')
         }
