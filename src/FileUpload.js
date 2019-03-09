@@ -1,3 +1,4 @@
+const PropTypes = require('prop-types');
 /**
  * Created by cheesu on 2015/8/17.
  */
@@ -19,7 +20,7 @@ const IEFormGroup = [true]
 let xhrList = []
 let currentXHRID = 0
 
-const PT = React.PropTypes
+const PT = PropTypes
 
 const FileUpload = React.createClass({
 
@@ -221,7 +222,7 @@ const FileUpload = React.createClass({
         this.chooseFile(files)
         this.chooseAndUpload && this.commonUpload()
     },
-    
+
     /*执行上传*/
     commonUpload() {
         /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
@@ -518,7 +519,7 @@ const FileUpload = React.createClass({
 
     /*外部调用方法，取消一个正在进行的xhr，传入id指定xhr（doupload时返回）或者默认取消最近一个。*/
     abort(id) {
-        id === undefined ? 
+        id === undefined ?
             xhrList[currentXHRID].abort() :
             xhrList[id].abort()
     },
@@ -552,7 +553,7 @@ const FileUpload = React.createClass({
 
     getUserAgent() {
         const userAgentString = this.props.options && this.props.options.userAgent;
-        const navigatorIsAvailable = typeof navigator !== 'undefined';        
+        const navigatorIsAvailable = typeof navigator !== 'undefined';
         if (!navigatorIsAvailable && !userAgentString) {
             throw new Error('\`options.userAgent\` must be set rendering react-fileuploader in situations when \`navigator\` is not defined in the global namespace. (on the server, for example)');
         }
