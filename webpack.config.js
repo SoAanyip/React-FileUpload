@@ -14,8 +14,8 @@ var sharedConfig = {
             test: /\.jsx?$/,
             loader: "babel",
             query: {
-              presets: ['react','es2015']
-            }            
+              presets: ['babel-preset-es2015', 'babel-preset-stage-0', 'babel-preset-react']
+            }
         }]
     },
     externals: [{
@@ -36,14 +36,14 @@ var devBundleConfig = Object.assign({}, sharedConfig, {
     entry: {
         'main': entry
     }
-}); 
+});
 
 var prodBundleConfig = Object.assign({}, sharedConfig, {
     entry: {
-        'main.min': entry 
+        'main.min': entry
     },
     plugins: [
-        new webpack.optimize.OccurenceOrderPlugin(),        
+        new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({
             compressor: {
             screw_ie8: true,
