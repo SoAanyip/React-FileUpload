@@ -1,4 +1,4 @@
-const PropTypes = require('prop-types');
+//@flow
 /**
  * Created by cheesu on 2015/8/17.
  */
@@ -10,7 +10,11 @@ const PropTypes = require('prop-types');
  */
 
 /*eslint indent: 0 */
-const React = require('react')
+// const React = require('react')
+import React from "react";
+// const PropTypes = require('prop-types');
+import PropTypes from "prop-types";
+
 const emptyFunction = function() {}
 /*当前IE上传组的id*/
 let currentIEID = 0
@@ -748,4 +752,4 @@ class FileUpload extends React.Component {
     };
 }
 
-module.exports = FileUpload
+export default FileUpload

@@ -7,7 +7,7 @@
 		exports["react-fileupload"] = factory(require("react"));
 	else
 		root["react-fileupload"] = factory(root["React"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_11__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -54,7 +54,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -62,13 +66,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _propTypes = __webpack_require__(2);
+
+	var _propTypes2 = _interopRequireDefault(_propTypes);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var PropTypes = __webpack_require__(1);
 	/**
 	 * Created by cheesu on 2015/8/17.
 	 */
@@ -80,7 +92,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	/*eslint indent: 0 */
-	var React = __webpack_require__(11);
+	// const React = require('react')
+
+	// const PropTypes = require('prop-types');
+
+
 	var emptyFunction = function emptyFunction() {};
 	/*当前IE上传组的id*/
 	var currentIEID = 0;
@@ -90,7 +106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var xhrList = [];
 	var currentXHRID = 0;
 
-	var PT = PropTypes;
+	var PT = _propTypes2.default;
 
 	var FileUpload = function (_React$Component) {
 	    _inherits(FileUpload, _React$Component);
@@ -218,7 +234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                middle = [],
 	                after = [];
 	            if (_this.chooseAndUpload) {
-	                React.Children.forEach(props.children, function (child) {
+	                _react2.default.Children.forEach(props.children, function (child) {
 	                    if (child && child.ref == 'chooseAndUpload') {
 	                        chooseBtn = child;
 	                        flag++;
@@ -227,7 +243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                });
 	            } else {
-	                React.Children.forEach(props.children, function (child) {
+	                _react2.default.Children.forEach(props.children, function (child) {
 	                    if (child && child.ref == 'chooseBtn') {
 	                        chooseBtn = child;
 	                        flag++;
@@ -270,7 +286,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            /*mill参数是当前时刻毫秒数，file第一次进行上传时会添加为file的属性，也可在beforeUpload为其添加，之后同一文件的mill不会更改，作为文件的识别id*/
 	            var mill = _this.files.length && _this.files[0].mill || new Date().getTime();
 	            var jud = _this.beforeUpload(_this.files, mill);
-	            if (jud != true && jud != undefined && (typeof jud === 'undefined' ? 'undefined' : _typeof(jud)) != 'object') {
+	            if (jud != true && jud != undefined && (typeof jud === "undefined" ? "undefined" : _typeof(jud)) != 'object') {
 	                /*清除input的值*/
 	                _this.refs['ajax_upload_file_input'].value = '';
 	                return;
@@ -323,7 +339,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var paramArr = [];
 	                param['_'] = mill;
 	                Object.keys(param).forEach(function (key) {
-	                    return paramArr.push(key + '=' + param[key]);
+	                    return paramArr.push(key + "=" + param[key]);
 	                });
 	                paramStr = '?' + paramArr.join('&');
 	            }
@@ -415,7 +431,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this.fileName = e.target.value.substring(e.target.value.lastIndexOf('\\') + 1);
 	            _this.chooseFile(_this.fileName);
 	            /*先执行IEUpload，配置好action等参数，然后submit*/
-	            _this.chooseAndUpload && _this.IEUpload() !== false && document.getElementById('ajax_upload_file_form_' + _this.IETag + currentIEID).submit();
+	            _this.chooseAndUpload && _this.IEUpload() !== false && document.getElementById("ajax_upload_file_form_" + _this.IETag + currentIEID).submit();
 	            e.target.blur();
 	        }, _this.IEUpload = function (e) {
 	            var mill = new Date().getTime();
@@ -437,13 +453,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                param['_'] = mill;
 	                param['ie'] === undefined && (param['ie'] = 'true');
 	                for (var key in param) {
-	                    if (param[key] != undefined) paramArr.push(key + '=' + param[key]);
+	                    if (param[key] != undefined) paramArr.push(key + "=" + param[key]);
 	                }
 	                paramStr = '?' + paramArr.join('&');
 	            }
 	            var targeturl = baseUrl + paramStr;
 
-	            document.getElementById('ajax_upload_file_form_' + _this.IETag + currentIEID).setAttribute('action', targeturl);
+	            document.getElementById("ajax_upload_file_form_" + _this.IETag + currentIEID).setAttribute('action', targeturl);
 	            /*IE假的上传进度*/
 	            var getFakeProgress = _this.fakeProgress();
 	            var loaded = 0,
@@ -462,7 +478,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            /*当前上传id*/
 	            var partIEID = currentIEID;
 	            /*回调函数*/
-	            window.attachEvent ? document.getElementById('ajax_upload_file_frame_' + _this.IETag + partIEID).attachEvent('onload', handleOnLoad) : document.getElementById('ajax_upload_file_frame_' + _this.IETag + partIEID).addEventListener('load', handleOnLoad);
+	            window.attachEvent ? document.getElementById("ajax_upload_file_frame_" + _this.IETag + partIEID).attachEvent('onload', handleOnLoad) : document.getElementById("ajax_upload_file_frame_" + _this.IETag + partIEID).addEventListener('load', handleOnLoad);
 
 	            function handleOnLoad() {
 	                /*clear progress interval*/
@@ -473,7 +489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    that.uploadError(e);
 	                } finally {
 	                    /*清除输入框的值*/
-	                    var oInput = document.getElementById('ajax_upload_hidden_input_' + that.IETag + partIEID);
+	                    var oInput = document.getElementById("ajax_upload_hidden_input_" + that.IETag + partIEID);
 	                    oInput.outerHTML = oInput.outerHTML;
 	                }
 	            }
@@ -484,20 +500,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            /*回复空闲状态*/
 	            IEFormGroup[frameId] = true;
 
-	            var frame = document.getElementById('ajax_upload_file_frame_' + _this.IETag + frameId);
+	            var frame = document.getElementById("ajax_upload_file_frame_" + _this.IETag + frameId);
 	            var resp = {};
 	            var content = frame.contentWindow ? frame.contentWindow.document.body : frame.contentDocument.document.body;
 	            if (!content) throw new Error('Your browser does not support async upload');
 	            try {
 	                resp.responseText = content.innerHTML || 'null innerHTML';
-	                resp.json = JSON ? JSON.parse(resp.responseText) : eval('(' + resp.responseText + ')');
+	                resp.json = JSON ? JSON.parse(resp.responseText) : eval("(" + resp.responseText + ")");
 	            } catch (e) {
 	                /*如果是包含了<pre>*/
 	                if (e.message && e.message.indexOf('Unexpected token') >= 0) {
 	                    /*包含返回的json*/
 	                    if (resp.responseText.indexOf('{') >= 0) {
 	                        var msg = resp.responseText.substring(resp.responseText.indexOf('{'), resp.responseText.lastIndexOf('}') + 1);
-	                        return JSON ? JSON.parse(msg) : eval('(' + msg + ')');
+	                        return JSON ? JSON.parse(msg) : eval("(" + msg + ")");
 	                    }
 	                    return { type: 'FINISHERROR', message: e.message };
 	                }
@@ -554,20 +570,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    multiple: _this.multiple
 	                };
 
-	                render = React.createElement(
-	                    'div',
+	                render = _react2.default.createElement(
+	                    "div",
 	                    { className: _this.props.className, style: _this.props.style },
 	                    _this.state.before,
-	                    React.createElement(
-	                        'div',
+	                    _react2.default.createElement(
+	                        "div",
 	                        { onClick: _this.commonChooseFile,
 	                            style: { overflow: 'hidden', postion: 'relative', display: _this.wrapperDisplay }
 	                        },
 	                        _this.state.chooseBtn
 	                    ),
 	                    _this.state.middle,
-	                    React.createElement(
-	                        'div',
+	                    _react2.default.createElement(
+	                        "div",
 	                        { onClick: _this.commonUpload,
 	                            style: {
 	                                overflow: 'hidden',
@@ -578,7 +594,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        _this.state.uploadBtn
 	                    ),
 	                    _this.state.after,
-	                    React.createElement('input', _extends({ type: 'file', name: 'ajax_upload_file_input', ref: 'ajax_upload_file_input',
+	                    _react2.default.createElement("input", _extends({ type: "file", name: "ajax_upload_file_input", ref: "ajax_upload_file_input",
 	                        style: { display: 'none' }, onChange: _this.commonChange
 	                    }, restAttrs))
 	                );
@@ -605,9 +621,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                i == IEFormGroup.length - 1 && !hasFree && IEFormGroup.push(true);
 	            }
 
-	            return React.createElement(
-	                'div',
-	                { className: _this.props.className, style: _this.props.style, id: 'react-file-uploader' },
+	            return _react2.default.createElement(
+	                "div",
+	                { className: _this.props.className, style: _this.props.style, id: "react-file-uploader" },
 	                formArr
 	            );
 
@@ -633,28 +649,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    disabled: isDisabled
 	                };
 
-	                var input = React.createElement('input', _extends({ type: 'file', name: 'ajax_upload_hidden_input_' + i, id: 'ajax_upload_hidden_input_' + i,
-	                    ref: 'ajax_upload_hidden_input_' + i, onChange: this.IEChooseFile, onClick: this.IEBeforeChoose,
+	                var input = _react2.default.createElement("input", _extends({ type: "file", name: "ajax_upload_hidden_input_" + i, id: "ajax_upload_hidden_input_" + i,
+	                    ref: "ajax_upload_hidden_input_" + i, onChange: this.IEChooseFile, onClick: this.IEBeforeChoose,
 	                    style: style }, restAttrs));
 
-	                i = '' + this.IETag + i;
-	                formArr.push(React.createElement(
-	                    'form',
-	                    { id: 'ajax_upload_file_form_' + i, method: 'post', target: 'ajax_upload_file_frame_' + i,
-	                        key: 'ajax_upload_file_form_' + i,
-	                        encType: 'multipart/form-data', ref: 'form_' + i, onSubmit: this.IEUpload,
+	                i = "" + this.IETag + i;
+	                formArr.push(_react2.default.createElement(
+	                    "form",
+	                    { id: "ajax_upload_file_form_" + i, method: "post", target: "ajax_upload_file_frame_" + i,
+	                        key: "ajax_upload_file_form_" + i,
+	                        encType: "multipart/form-data", ref: "form_" + i, onSubmit: this.IEUpload,
 	                        style: { display: isShow ? 'block' : 'none' }
 	                    },
 	                    this.state.before,
-	                    React.createElement(
-	                        'div',
+	                    _react2.default.createElement(
+	                        "div",
 	                        { style: { overflow: 'hidden', position: 'relative', display: 'inline-block' } },
 	                        this.state.chooseBtn,
 	                        input
 	                    ),
 	                    this.state.middle,
-	                    React.createElement(
-	                        'div',
+	                    _react2.default.createElement(
+	                        "div",
 	                        { style: {
 	                                overflow: 'hidden',
 	                                position: 'relative',
@@ -662,7 +678,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            }
 	                        },
 	                        this.state.uploadBtn,
-	                        React.createElement('input', { type: 'submit',
+	                        _react2.default.createElement("input", { type: "submit",
 	                            style: {
 	                                position: 'absolute',
 	                                left: 0,
@@ -675,10 +691,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    ),
 	                    this.state.after
 	                ));
-	                formArr.push(React.createElement('iframe', { id: 'ajax_upload_file_frame_' + i,
-	                    name: 'ajax_upload_file_frame_' + i,
-	                    key: 'ajax_upload_file_frame_' + i,
-	                    className: 'ajax_upload_file_frame',
+	                formArr.push(_react2.default.createElement("iframe", { id: "ajax_upload_file_frame_" + i,
+	                    name: "ajax_upload_file_frame_" + i,
+	                    key: "ajax_upload_file_frame_" + i,
+	                    className: "ajax_upload_file_frame",
 	                    style: {
 	                        display: 'none',
 	                        width: 0,
@@ -756,7 +772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	    _createClass(FileUpload, [{
-	        key: 'componentWillMount',
+	        key: "componentWillMount",
 	        value: function componentWillMount() {
 	            this.userAgent = this.getUserAgent();
 	            this.isIE = !(this.checkIE() < 0 || this.checkIE() >= 10);
@@ -767,15 +783,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this._updateProps(this.props);
 	        }
 	    }, {
-	        key: 'componentDidMount',
+	        key: "componentDidMount",
 	        value: function componentDidMount() {}
 	    }, {
-	        key: 'componentWillReceiveProps',
+	        key: "componentWillReceiveProps",
 	        value: function componentWillReceiveProps(newProps) {
 	            this._updateProps(newProps);
 	        }
 	    }, {
-	        key: 'render',
+	        key: "render",
 	        value: function render() {
 	            return this._packRender();
 	        }
@@ -789,7 +805,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }]);
 
 	    return FileUpload;
-	}(React.Component);
+	}(_react2.default.Component);
 
 	FileUpload.propTypes = {
 	    options: PT.shape({
@@ -828,12 +844,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    style: PT.object,
 	    className: PT.string
 	};
-
-
-	module.exports = FileUpload;
+	exports.default = FileUpload;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -846,21 +866,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactIs = __webpack_require__(3);
+	  var ReactIs = __webpack_require__(4);
 
 	  // By explicitly using `prop-types` you are opting into new development behavior.
 	  // http://fb.me/prop-types-in-prod
 	  var throwOnDirectAccess = true;
-	  module.exports = __webpack_require__(6)(ReactIs.isElement, throwOnDirectAccess);
+	  module.exports = __webpack_require__(7)(ReactIs.isElement, throwOnDirectAccess);
 	} else {
 	  // By explicitly using `prop-types` you are opting into new production behavior.
 	  // http://fb.me/prop-types-in-prod
-	  module.exports = __webpack_require__(10)();
+	  module.exports = __webpack_require__(11)();
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -1052,20 +1072,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	if (process.env.NODE_ENV === 'production') {
-	  module.exports = __webpack_require__(4);
-	} else {
 	  module.exports = __webpack_require__(5);
+	} else {
+	  module.exports = __webpack_require__(6);
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 	/** @license React v16.8.4
@@ -1139,7 +1159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/** @license React v16.8.4
@@ -1369,10 +1389,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    exports.isSuspense = isSuspense;
 	  })();
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1386,11 +1406,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-	var ReactIs = __webpack_require__(3);
-	var assign = __webpack_require__(7);
+	var ReactIs = __webpack_require__(4);
+	var assign = __webpack_require__(8);
 
-	var ReactPropTypesSecret = __webpack_require__(8);
-	var checkPropTypes = __webpack_require__(9);
+	var ReactPropTypesSecret = __webpack_require__(9);
+	var checkPropTypes = __webpack_require__(10);
 
 	var has = Function.call.bind(Object.prototype.hasOwnProperty);
 	var printWarning = function printWarning() {};
@@ -1946,10 +1966,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return ReactPropTypes;
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 	/*
@@ -2044,7 +2064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 	/**
@@ -2061,7 +2081,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ReactPropTypesSecret;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -2078,7 +2098,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var printWarning = function printWarning() {};
 
 	if (process.env.NODE_ENV !== 'production') {
-	  var ReactPropTypesSecret = __webpack_require__(8);
+	  var ReactPropTypesSecret = __webpack_require__(9);
 	  var loggedTypeFailures = {};
 	  var has = Function.call.bind(Object.prototype.hasOwnProperty);
 
@@ -2156,10 +2176,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = checkPropTypes;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/**
@@ -2171,7 +2191,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var ReactPropTypesSecret = __webpack_require__(8);
+	var ReactPropTypesSecret = __webpack_require__(9);
 
 	function emptyFunction() {}
 	function emptyFunctionWithReset() {}
@@ -2222,12 +2242,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return ReactPropTypes;
 	};
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_11__;
 
 /***/ })
 /******/ ])
