@@ -3,6 +3,8 @@
  * Edited by Kevin Wang (thiskevinwang) on 2019/3/09.
  */
 
+// @flow
+
 /*eslint indent: 0 */
 // const React = require('react')
 import React from "react";
@@ -18,46 +20,44 @@ const IEFormGroup = [true];
 let xhrList = [];
 let currentXHRID = 0;
 
-const PT = PropTypes;
-
 class FileUpload extends React.Component {
   /*类型验证*/
   static propTypes = {
-    options: PT.shape({
+    options: PropTypes.shape({
       /*basics*/
-      baseUrl: PT.string.isRequired,
-      param: PT.oneOfType([PT.object, PT.func]),
-      dataType: PT.string,
-      chooseAndUpload: PT.bool,
-      paramAddToField: PT.oneOfType([PT.object, PT.func]),
-      wrapperDisplay: PT.string,
-      timeout: PT.number,
-      accept: PT.string,
-      multiple: PT.bool,
-      numberLimit: PT.oneOfType([PT.number, PT.func]),
-      fileFieldName: PT.oneOfType([PT.string, PT.func]),
-      withCredentials: PT.bool,
-      requestHeaders: PT.object,
+      baseUrl: PropTypes.string.isRequired,
+      param: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+      dataType: PropTypes.string,
+      chooseAndUpload: PropTypes.bool,
+      paramAddToField: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+      wrapperDisplay: PropTypes.string,
+      timeout: PropTypes.number,
+      accept: PropTypes.string,
+      multiple: PropTypes.bool,
+      numberLimit: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
+      fileFieldName: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+      withCredentials: PropTypes.bool,
+      requestHeaders: PropTypes.object,
       /*specials*/
-      tag: PT.string,
-      userAgent: PT.string,
-      disabledIEChoose: PT.oneOfType([PT.bool, PT.func]),
-      _withoutFileUpload: PT.bool,
-      filesToUpload: PT.arrayOf(PT.object),
-      textBeforeFiles: PT.bool,
+      tag: PropTypes.string,
+      userAgent: PropTypes.string,
+      disabledIEChoose: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
+      _withoutFileUpload: PropTypes.bool,
+      filesToUpload: PropTypes.arrayOf(PropTypes.object),
+      textBeforeFiles: PropTypes.bool,
       /*funcs*/
-      beforeChoose: PT.func,
-      chooseFile: PT.func,
-      beforeUpload: PT.func,
-      doUpload: PT.func,
-      uploading: PT.func,
-      uploadSuccess: PT.func,
-      uploadError: PT.func,
-      uploadFail: PT.func,
-      onabort: PT.func
+      beforeChoose: PropTypes.func,
+      chooseFile: PropTypes.func,
+      beforeUpload: PropTypes.func,
+      doUpload: PropTypes.func,
+      uploading: PropTypes.func,
+      uploadSuccess: PropTypes.func,
+      uploadError: PropTypes.func,
+      uploadFail: PropTypes.func,
+      onabort: PropTypes.func
     }).isRequired,
-    style: PT.object,
-    className: PT.string
+    style: PropTypes.object,
+    className: PropTypes.string
   };
 
   state = {
