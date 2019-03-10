@@ -27,8 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "create-react-class": "^15.6.3",
-    "prop-types": "^15.7.2",
-    "react": "^16.8.3"
+    "prop-types": "^15.7.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -39,6 +38,7 @@
     "es5-shim": "^4.1.10",
     "flow-bin": "^0.94.0",
     "jsx-loader": "^0.13.2",
+    "react": "^16.2.0",
     "webpack": "^1.12.14"
   },
   "bugs": {
